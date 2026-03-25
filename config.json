@@ -1,0 +1,669 @@
+{
+  "departments": {
+    "Train Operations": {
+      "TO": "Train Operators",
+      "TA": "Train Attendants",
+      "CC": "Crew Controllers"
+    },
+    "Station Operations": {
+      "SC": "Station Controller",
+      "EFO": "Excess Fare Officer"
+    },
+    "OCC": {
+      "TC": "Traffic Controller",
+      "DC": "Depot Controller",
+      "FMC": "Fault Management Controller",
+      "ASC": "Auxiliary System Controller",
+      "TPC": "Traction Power Controller",
+      "RSC": "Rolling Stock Controller",
+      "IC": "Information Controller",
+      "CC": "Chief Controller"
+    }
+  },
+  "duty_mapping": [
+    {
+      "pattern": ".*TRAINING DUTY.*|.*LRD AND HANDELING.*",
+      "category": "Training",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^G-SPARE.*|^G-techinical.*",
+      "category": "General Spare/protection duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SR\\s*-\\s*\\d+$",
+      "category": "RRTS Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^MM\\s*-\\s*\\d+$",
+      "category": "MRTS Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SM\\s*-\\s*\\d+$",
+      "category": "MRTS Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SMR\\s*-\\s*\\d+$",
+      "category": "RRTS Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^HSB",
+      "category": "Stand by Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^R[12]\\s*HSB.*",
+      "category": "RRTS Stand by Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SH\\d+$",
+      "category": "Shuttle Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SH\\s*-\\s*\\d+$",
+      "category": "Shuttle Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^MH-\\d+$",
+      "category": "MRTS Stand by Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^TO-",
+      "category": "On Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^NIGHT DEPOT$",
+      "category": "Depot Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "DEPOT TO",
+      "category": "Depot Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "TO DCC DEPOT",
+      "category": "Depot Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^G-ADMIN",
+      "category": "General Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "REFERSHER",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*(?:WAITING.*RRTS|RRTS.*WAITING).*",
+      "category": "RRTS Spare/protection duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*(?:WAITING.*MRTS|MRTS.*WAITING).*",
+      "category": "MRTS Spare/protection duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "WAITING",
+      "category": "Protection Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^\\s*CL(?:\\s*[-xX]?\\s*\\d*:\\d*|-.*)?$",
+      "category": "Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*EL\\s*$",
+      "category": "Earned Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*SL\\s*$",
+      "category": "Sick Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*PH\\s*$",
+      "category": "Public Holiday",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*OH\\s*$",
+      "category": "Optional Holiday",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*WO\\s*$",
+      "category": "Weekly Off",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*AP\\s*$",
+      "category": "Absent",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^\\s*AB\\s*$",
+      "category": "Absent",
+      "status": "Inactive"
+    },
+    {
+      "pattern": ".*DEROSTER.*",
+      "category": "DEROSTER",
+      "status": "Inactive"
+    },
+    {
+      "pattern": ".*OJT.*",
+      "category": "On job training",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*SPARE.*MRTS.*",
+      "category": "MRTS Spare/protection duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*SPARE.*RRTS.*",
+      "category": "RRTS Spare/protection duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*SPARE.*",
+      "category": "Spare/protection shift",
+      "status": "Active"
+    },
+    {
+      "pattern": "^G-Crew",
+      "category": "Crew Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^G- TECHNICAL SPARE",
+      "category": "Technical Spare (General shift)",
+      "status": "Active"
+    },
+    {
+      "pattern": "^MHSB",
+      "category": "MRTS stand by duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^AHSB",
+      "category": "RRTS stand by duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^BHSB",
+      "category": "RRTS stand by duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^[MENG]-",
+      "category": "On Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SH$",
+      "category": "Shuttle Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^(DC|TC|BCC|ASC|RSC|TPC|FMC|IC|CC|OCC)",
+      "category": "On Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^[MENG]$",
+      "category": "On Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^W$",
+      "category": "Weekly Off",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^LWP",
+      "category": "Leave Without Pay",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^A$",
+      "category": "Absent",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^CO",
+      "category": "Compensatory OFF",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "SL/CL",
+      "category": "Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^RR-\\d+$",
+      "category": "RRTS duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SKR-\\d+$",
+      "category": "RRTS Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^WDR-\\d+$",
+      "category": "Protection Duty RRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^WDM-\\d+$",
+      "category": "Protection Duty MRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^CL-15:00$",
+      "category": "Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^CL08:00-$",
+      "category": "Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^CLWO$",
+      "category": "Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^CLxNO$",
+      "category": "Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^CMPL$",
+      "category": "Compassionate Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^DEPOT AMS PDC TRAINER$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DEPOT AMS PDC TRAINING$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DEPOT SIMULATOR VISIT$",
+      "category": "Simulator",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DEPOT TEST TRACK$",
+      "category": "Testing",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DEPOT TESTING DUTY$",
+      "category": "Testing",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DUHD TESTING DUTY$",
+      "category": "Testing",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DUHD TESTING DUTY MRTS$",
+      "category": "Testing",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DUHD TESTTRACK DUTY$",
+      "category": "Testing",
+      "status": "Active"
+    },
+    {
+      "pattern": "^DUHD TRAINING DUTY$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^GENERAL TA TRAINING$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^LMCL$",
+      "category": "Last minute Casual Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^LOP$",
+      "category": "Leave without Pay",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^LWP$",
+      "category": "Leave without Pay",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^MODI\\+DUHD REPORTING CASE ENQUIRY$",
+      "category": "Enquiry",
+      "status": "Active"
+    },
+    {
+      "pattern": "^NO DUTY ASSIGNMENT$",
+      "category": "No duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^PH$",
+      "category": "Public holiday",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^SAFETY TRAINING DUHD$",
+      "category": "Safety Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SAFETY TRAINING DUTY$",
+      "category": "Safety Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SAHI AMS PDC TRAINER$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SAHI LRD AND TRAIN HANDELING$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SAHI TRAIN LRD AND DRIVING$",
+      "category": "Training",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SH-1 W$",
+      "category": "Shuttle Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SL$",
+      "category": "Sick Leave",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^TC02-E$",
+      "category": "Pickup duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^UNDER TA ROSTER$",
+      "category": "Transferred from TO to TA",
+      "status": "Active"
+    },
+    {
+      "pattern": "^xNO$",
+      "category": "Night Off",
+      "status": "Inactive"
+    },
+    {
+      "pattern": "^SKAL RRTS WAITING-3$",
+      "category": "Protection Duty RRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^MRTS WAITING-1 A10\\)$",
+      "category": "Protection Duty MRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^SKALRRTS WAITING-2$",
+      "category": "Protection Duty RRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^MRTS WAITING-3$",
+      "category": "Protection Duty MRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^RRTS WAITING-1 \\(DUHAI\\)$",
+      "category": "Protection Duty RRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^MRTS WAITING-2 \\(MODI\\)$",
+      "category": "Protection Duty MRTS",
+      "status": "Active"
+    },
+    {
+      "pattern": "^CO$",
+      "category": "Compensatory Leave",
+      "status": "Inactive"
+    }
+  ],
+  "leave_categories": {
+    "CL": "Casual Leave",
+    "EL": "Earned Leave",
+    "SL": "Sick Leave",
+    "PH": "Public Holiday",
+    "OH": "Optional Holiday",
+    "WO": "Weekly Off",
+    "AB": "Absent",
+    "CO": "Compensatory OFF",
+    "LMCL": "Last Minute CL"
+  },
+  "staff_capacity_counts": {
+    "Train Operators": {
+      "planned_count": 161,
+      "approved_count": 161
+    },
+    "Train Attendants": {
+      "planned_count": 113,
+      "approved_count": 102
+    },
+    "Crew Controllers": {
+      "planned_count": 9,
+      "approved_count": 8
+    },
+    "Station Controller": {
+      "planned_count": 102,
+      "approved_count": 102
+    },
+    "Excess Fare Officer": {
+      "planned_count": 112,
+      "approved_count": 112
+    },
+    "Traffic Controller": {
+      "planned_count": 10,
+      "approved_count": 10
+    },
+    "Depot Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    },
+    "Fault Management Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    },
+    "Auxiliary System Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    },
+    "Traction Power Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    },
+    "Rolling Stock Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    },
+    "Information Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    },
+    "Chief Controller": {
+      "planned_count": 5,
+      "approved_count": 5
+    }
+  },
+  "required_counts": {
+    "Train Attendants": {
+      "shift_duty_required": {
+        "RRTS Duty": 37,
+        "RRTS stand by duty": 6,
+        "RRTS Spare/protection duty": 3,
+        "MRTS Duty": 21,
+        "MRTS stand by duty": 2,
+        "MRTS Spare/protection duty": 3,
+        "Shuttle Duty": 3,
+        "General Spare/protection duty": 1
+      },
+      "total_shift_duty_required": 76,
+      "maximum_leave_per_day": 8,
+      "ideal_weekly_off_per_day": 15,
+      "total_count": 99
+    },
+    "Train Operators": {
+      "shift_duty_required": {
+        "RRTS Duty": 49,
+        "RRTS stand by duty": 6,
+        "RRTS Spare/protection duty": 8,
+        "MRTS Duty": 26,
+        "MRTS stand by duty": 3,
+        "MRTS Spare/protection duty": 8,
+        "Shuttle Duty": 5,
+        "General Spare/protection duty": 1
+      },
+      "total_shift_duty_required": 106,
+      "maximum_leave_per_day": 29,
+      "ideal_weekly_off_per_day": 24,
+      "total_count": 159
+    },
+    "Traffic Controller": {
+      "shift_duty_required": {
+        "On Duty": 6,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 6,
+      "maximum_leave_per_day": 2,
+      "ideal_weekly_off_per_day": 2,
+      "general_shift_if_no_weekly_off": 2,
+      "total_count": 6
+    },
+    "Depot Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    },
+    "Fault Management Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    },
+    "Auxiliary System Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    },
+    "Traction Power Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    },
+    "Rolling Stock Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    },
+    "Information Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    },
+    "Chief Controller": {
+      "shift_duty_required": {
+        "On Duty": 3,
+        "General Duty": 1
+      },
+      "total_shift_duty_required": 3,
+      "maximum_leave_per_day": 1,
+      "ideal_weekly_off_per_day": 1,
+      "general_shift_if_no_weekly_off": 1,
+      "total_count": 3
+    }
+  },
+  "fatigue_rules": [
+    {
+      "rule_name": "No Early Shift immediately following a Late or Night Shift",
+      "previous_shift_types": [
+        "Night",
+        "Late"
+      ],
+      "current_shift_types": [
+        "Early"
+      ]
+    }
+  ]
+}

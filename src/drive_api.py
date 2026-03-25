@@ -1,0 +1,170 @@
+import os
+import io
+import tempfile
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+UPLOAD_SCOPES = ['https://www.googleapis.com/auth/drive']
+CREDENTIALS_PATH = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json')
+FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+
+def get_drive_service():
+    """Authenticates and returns the Google Drive API service (read-only)."""
+    if not os.path.exists(CREDENTIALS_PATH):
+        raise FileNotFoundError(f"Credentials file not found at {CREDENTIALS_PATH}")
+    
+    creds = service_account.Credentials.from_service_account_file(
+        CREDENTIALS_PATH, scopes=SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+    return service
+
+
+def get_drive_upload_service():
+    """Authenticates and returns the Google Drive API service with full read-write access."""
+    if not os.path.exists(CREDENTIALS_PATH):
+        raise FileNotFoundError(f"Credentials file not found at {CREDENTIALS_PATH}")
+
+    creds = service_account.Credentials.from_service_account_file(
+        CREDENTIALS_PATH, scopes=UPLOAD_SCOPES)
+    service = build('drive', 'v3', credentials=creds)
+    return service
+
+
+def get_or_create_folder(service, parent_id, folder_name):
+    """
+    Returns the ID of a Drive folder with the given name inside parent_id.
+    Creates the folder if it does not exist.
+    """
+    safe_name = folder_name.replace("'", "\\'")
+    query = (
+        f"'{parent_id}' in parents and "
+        f"name = '{safe_name}' and "
+        f"mimeType = 'application/vnd.google-apps.folder' and "
+        f"trashed = false"
+    )
+    results = service.files().list(
+        q=query,
+        fields="files(id, name)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
+    ).execute()
+
+    folders = results.get('files', [])
+    if folders:
+        return folders[0]['id']
+
+    metadata = {
+        'name': folder_name,
+        'mimeType': 'application/vnd.google-apps.folder',
+        'parents': [parent_id],
+    }
+    folder = service.files().create(
+        body=metadata,
+        fields='id',
+        supportsAllDrives=True
+    ).execute()
+    return folder['id']
+
+
+def upload_pdf_to_drive(service, file_bytes, file_name, parent_folder_id):
+    """
+    Uploads a PDF to the specified Drive folder.
+    If a file with the same name already exists it is replaced (updated in-place,
+    keeping the same file ID). Returns (file_id, was_replaced).
+    """
+    safe_name = file_name.replace("'", "\\'")
+    query = (
+        f"'{parent_folder_id}' in parents and "
+        f"name = '{safe_name}' and "
+        f"trashed = false"
+    )
+    results = service.files().list(
+        q=query,
+        fields="files(id, name)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
+    ).execute()
+
+    existing = results.get('files', [])
+    media = MediaIoBaseUpload(io.BytesIO(file_bytes), mimetype='application/pdf', resumable=True)
+
+    if existing:
+        file_id = existing[0]['id']
+        updated = service.files().update(
+            fileId=file_id,
+            media_body=media,
+            supportsAllDrives=True
+        ).execute()
+        return updated['id'], True  # True = file was replaced
+
+    metadata = {
+        'name': file_name,
+        'parents': [parent_folder_id],
+        'mimeType': 'application/pdf',
+    }
+    new_file = service.files().create(
+        body=metadata,
+        media_body=media,
+        fields='id',
+        supportsAllDrives=True
+    ).execute()
+    return new_file['id'], False  # False = new file created
+
+def get_all_pdfs_recursive(service, folder_id):
+    """Recursively fetches all PDFs from the specified Drive folder and its subfolders."""
+    pdfs = []
+    
+    query = f"'{folder_id}' in parents and trashed=false"
+    results = service.files().list(
+        q=query,
+        pageSize=1000,
+        fields="nextPageToken, files(id, name, mimeType, modifiedTime)",
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True
+    ).execute()
+    
+    items = results.get('files', [])
+    for item in items:
+        if item['mimeType'] == 'application/vnd.google-apps.folder':
+            pdfs.extend(get_all_pdfs_recursive(service, item['id']))
+        elif item['mimeType'] == 'application/pdf':
+            pdfs.append(item)
+            
+    return pdfs
+
+def download_pdf(service, file_id, file_name, download_dir='data/raw_pdfs'):
+    """Downloads a file from Google Drive to a local directory."""
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir)
+        
+    request = service.files().get_media(fileId=file_id)
+    file_path = os.path.join(download_dir, file_name)
+    
+    with open(file_path, 'wb') as f:
+        downloader = MediaIoBaseDownload(f, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+            # print(f"Download {int(status.progress() * 100)}%.")
+            
+    return file_path
+
+if __name__ == "__main__":
+    # Test the Drive connection
+    try:
+        service = get_drive_service()
+        print("Successfully authenticated with Google Drive!")
+        if FOLDER_ID and FOLDER_ID != "your-folder-id":
+            files = get_all_pdfs_recursive(service, FOLDER_ID)
+            print(f"Found {len(files)} PDFs recursively in folder {FOLDER_ID}")
+            for f in files:
+                print(f"- {f['name']} ({f.get('modifiedTime', 'N/A')})")
+        else:
+            print("Please set your GOOGLE_DRIVE_FOLDER_ID in the .env file.")
+    except Exception as e:
+        print(f"Error checking Google Drive API: {e}")

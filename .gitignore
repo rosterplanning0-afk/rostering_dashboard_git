@@ -1,0 +1,43 @@
+# ── Virtual environment ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Local data & PDFs (not committed) ───────────────────────────────────────
+data/
+example_pdfs/
+
+# ── Test / one-off scripts ───────────────────────────────────────────────────
+tests/
+
+# ── Secrets & credentials ────────────────────────────────────────────────────
+.env
+google_credentials.json
+
+# ── Temporary output files ───────────────────────────────────────────────────
+uncat_summary.txt
+uncategorized_duties.csv
+unassigned_crew_types.xlsx
+
+# ── Python cache ─────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# ── Streamlit cache ──────────────────────────────────────────────────────────
+.streamlit/secrets.toml
+
+# ── OS / editor artefacts ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+*.egg-info/
+dist/
+build/
