@@ -4,7 +4,7 @@ from datetime import datetime
 import streamlit as st
 from dotenv import load_dotenv
 
-from src.drive_api import get_drive_upload_service, get_or_create_folder, upload_pdf_to_drive
+from src.drive_api import get_drive_upload_service, get_or_create_folder, upload_pdf_to_drive, get_google_drive_folder_id
 from src.processor import process_new_rosters
 from src.ui_components import render_sidebar
 
@@ -18,7 +18,7 @@ st.set_page_config(
 
 config = render_sidebar()
 
-FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+FOLDER_ID = get_google_drive_folder_id()
 departments = config.get('departments', {})
 current_year = str(datetime.now().year)
 

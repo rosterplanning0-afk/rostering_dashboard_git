@@ -1,14 +1,14 @@
 import os
 import pandas as pd
 from datetime import datetime, timedelta, timezone
-from src.drive_api import get_drive_service, get_all_pdfs_recursive, download_pdf
+from src.drive_api import get_drive_service, get_all_pdfs_recursive, download_pdf, get_google_drive_folder_id
 from src.pdf_parser import parse_ivu_pdf
 from src.supabase_client import get_supabase_client, insert_raw_roster, insert_processed_roster, upsert_daily_summary, delete_records_for_date, get_sync_history, upsert_sync_history
 from dotenv import load_dotenv
 
 load_dotenv()
 
-FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+FOLDER_ID = get_google_drive_folder_id()
 
 def process_new_rosters(force_all=False):
     """
