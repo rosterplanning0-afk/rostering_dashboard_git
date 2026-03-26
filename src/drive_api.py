@@ -18,18 +18,32 @@ def get_google_credentials(scopes):
     # 1. Try Streamlit Secrets (if running in a Streamlit app)
     try:
         import streamlit as st
-        # Requires Streamlit 1.28+ handling of secrets or standard dictionary-like access
+        # Option A: TOML dictionary mapping [gcp_service_account]
         if "gcp_service_account" in st.secrets:
             creds_info = dict(st.secrets["gcp_service_account"])
             return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
-    except Exception:
+        
+        # Option B: Multi-line JSON string stored as GOOGLE_SERVICE_ACCOUNT_JSON
+        if "GOOGLE_SERVICE_ACCOUNT_JSON" in st.secrets:
+            creds_json = st.secrets["GOOGLE_SERVICE_ACCOUNT_JSON"]
+            creds_info = json.loads(creds_json)
+            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+            
+        # Option C: JSON string stored as GOOGLE_CREDENTIALS_JSON
+        if "GOOGLE_CREDENTIALS_JSON" in st.secrets:
+            creds_json = st.secrets["GOOGLE_CREDENTIALS_JSON"]
+            creds_info = json.loads(creds_json)
+            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+    except Exception as e:
+        print(f"Failed to load from st.secrets: {e}")
         pass
 
     # 2. Try JSON string from environment variable (Useful for Docker/CI)
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-    if creds_json:
-        creds_info = json.loads(creds_json)
-        return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+    for env_var in ["GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_CREDENTIALS_JSON"]:
+        creds_json = os.environ.get(env_var)
+        if creds_json:
+            creds_info = json.loads(creds_json)
+            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
 
     # 3. Fallback to local JSON credentials file (Usually for local development)
     cred_path = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json').strip('"\'')
