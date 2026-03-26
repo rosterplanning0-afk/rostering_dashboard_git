@@ -32,23 +32,29 @@ def get_google_credentials(scopes):
         return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
 
     # 3. Fallback to local JSON credentials file (Usually for local development)
-    cred_path = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json')
+    cred_path = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json').strip('"\'')
     if os.path.exists(cred_path):
         return service_account.Credentials.from_service_account_file(cred_path, scopes=scopes)
+        
+    # Extra fallback just in case the env var is messed up but the file is there
+    if os.path.exists('google_credentials.json'):
+        return service_account.Credentials.from_service_account_file('google_credentials.json', scopes=scopes)
 
     raise FileNotFoundError("Google API credentials not found in st.secrets, ENV, or local file.")
-
 
 def get_google_drive_folder_id():
     """Retrieves the Google Drive Folder ID supporting Streamlit secrets and env vars."""
     try:
         import streamlit as st
         if "GOOGLE_DRIVE_FOLDER_ID" in st.secrets:
-            return st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
+            return st.secrets["GOOGLE_DRIVE_FOLDER_ID"].strip('"\'')
     except Exception:
         pass
     
-    return os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+    val = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+    if val:
+        return val.strip('"\'')
+    return None
 
 
 def get_drive_service():
