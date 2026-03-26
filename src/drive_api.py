@@ -26,13 +26,13 @@ def get_google_credentials(scopes):
         # Option B: Multi-line JSON string stored as GOOGLE_SERVICE_ACCOUNT_JSON
         if "GOOGLE_SERVICE_ACCOUNT_JSON" in st.secrets:
             creds_json = st.secrets["GOOGLE_SERVICE_ACCOUNT_JSON"]
-            creds_info = json.loads(creds_json)
+            creds_info = json.loads(creds_json, strict=False)
             return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
             
         # Option C: JSON string stored as GOOGLE_CREDENTIALS_JSON
         if "GOOGLE_CREDENTIALS_JSON" in st.secrets:
             creds_json = st.secrets["GOOGLE_CREDENTIALS_JSON"]
-            creds_info = json.loads(creds_json)
+            creds_info = json.loads(creds_json, strict=False)
             return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
     except Exception as e:
         print(f"Failed to load from st.secrets: {e}")
@@ -42,7 +42,7 @@ def get_google_credentials(scopes):
     for env_var in ["GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_CREDENTIALS_JSON"]:
         creds_json = os.environ.get(env_var)
         if creds_json:
-            creds_info = json.loads(creds_json)
+            creds_info = json.loads(creds_json, strict=False)
             return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
 
     # 3. Fallback to local JSON credentials file (Usually for local development)
