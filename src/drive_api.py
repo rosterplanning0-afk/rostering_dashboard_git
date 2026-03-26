@@ -1,5 +1,6 @@
 import os
 import io
+import json
 import tempfile
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -10,27 +11,56 @@ load_dotenv()
 
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 UPLOAD_SCOPES = ['https://www.googleapis.com/auth/drive']
-CREDENTIALS_PATH = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json')
-FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+
+
+def get_google_credentials(scopes):
+    """Retrieves Google service account credentials supporting Streamlit secrets, env vars, and local file."""
+    # 1. Try Streamlit Secrets (if running in a Streamlit app)
+    try:
+        import streamlit as st
+        # Requires Streamlit 1.28+ handling of secrets or standard dictionary-like access
+        if "gcp_service_account" in st.secrets:
+            creds_info = dict(st.secrets["gcp_service_account"])
+            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+    except Exception:
+        pass
+
+    # 2. Try JSON string from environment variable (Useful for Docker/CI)
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+    if creds_json:
+        creds_info = json.loads(creds_json)
+        return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+
+    # 3. Fallback to local JSON credentials file (Usually for local development)
+    cred_path = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json')
+    if os.path.exists(cred_path):
+        return service_account.Credentials.from_service_account_file(cred_path, scopes=scopes)
+
+    raise FileNotFoundError("Google API credentials not found in st.secrets, ENV, or local file.")
+
+
+def get_google_drive_folder_id():
+    """Retrieves the Google Drive Folder ID supporting Streamlit secrets and env vars."""
+    try:
+        import streamlit as st
+        if "GOOGLE_DRIVE_FOLDER_ID" in st.secrets:
+            return st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
+    except Exception:
+        pass
+    
+    return os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
+
 
 def get_drive_service():
     """Authenticates and returns the Google Drive API service (read-only)."""
-    if not os.path.exists(CREDENTIALS_PATH):
-        raise FileNotFoundError(f"Credentials file not found at {CREDENTIALS_PATH}")
-    
-    creds = service_account.Credentials.from_service_account_file(
-        CREDENTIALS_PATH, scopes=SCOPES)
+    creds = get_google_credentials(SCOPES)
     service = build('drive', 'v3', credentials=creds)
     return service
 
 
 def get_drive_upload_service():
     """Authenticates and returns the Google Drive API service with full read-write access."""
-    if not os.path.exists(CREDENTIALS_PATH):
-        raise FileNotFoundError(f"Credentials file not found at {CREDENTIALS_PATH}")
-
-    creds = service_account.Credentials.from_service_account_file(
-        CREDENTIALS_PATH, scopes=UPLOAD_SCOPES)
+    creds = get_google_credentials(UPLOAD_SCOPES)
     service = build('drive', 'v3', credentials=creds)
     return service
 
