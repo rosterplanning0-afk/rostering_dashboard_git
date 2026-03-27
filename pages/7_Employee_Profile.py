@@ -4,8 +4,6 @@ import datetime
 from src.supabase_client import get_supabase_client
 from src.ui_components import render_sidebar
 
-st.set_page_config(page_title="Employee Profile Management", page_icon=":material/person:", layout="wide")
-
 st.markdown("## :material/person: Employee Profile & HR Competency Management")
 st.markdown("Manage time-bounded roles and historical designations (e.g. Train Operator vs Crew Controller) per individual operator.")
 

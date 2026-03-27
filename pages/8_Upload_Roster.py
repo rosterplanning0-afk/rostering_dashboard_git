@@ -10,12 +10,6 @@ from src.ui_components import render_sidebar
 
 load_dotenv()
 
-st.set_page_config(
-    page_title="Upload Roster",
-    page_icon=":material/upload_file:",
-    layout="wide",
-)
-
 config = render_sidebar()
 
 FOLDER_ID = get_google_drive_folder_id()

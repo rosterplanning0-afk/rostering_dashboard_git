@@ -10,7 +10,20 @@ def render_sidebar():
     config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.json')
     with open(config_path, 'r') as f:
         config = json.load(f)
+
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("#### :material/calendar_month: Select Time Period")
+    
+    if 'selected_date' not in st.session_state:
+        st.session_state['selected_date'] = datetime.datetime.now().date()
         
+    current_date = st.session_state['selected_date']
+    selected_date = st.sidebar.date_input("Date", value=current_date)
+    
+    if selected_date != current_date:
+        st.session_state['selected_date'] = selected_date
+        st.rerun()
+
     st.sidebar.markdown("#### :material/business: Select Department")
     dept_options = list(config['departments'].keys())
     
@@ -55,19 +68,6 @@ def render_sidebar():
     # State update and rerun for role change
     if selected_role != current_role:
         st.session_state['selected_role'] = selected_role
-        st.rerun()
-    
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("#### :material/calendar_month: Select Time Period")
-    
-    if 'selected_date' not in st.session_state:
-        st.session_state['selected_date'] = datetime.datetime.now().date()
-        
-    current_date = st.session_state['selected_date']
-    selected_date = st.sidebar.date_input("Date", value=current_date)
-    
-    if selected_date != current_date:
-        st.session_state['selected_date'] = selected_date
         st.rerun()
     
     st.sidebar.markdown("---")

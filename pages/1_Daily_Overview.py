@@ -7,8 +7,6 @@ import plotly.express as px
 import datetime
 import re
 
-st.set_page_config(page_title="Daily Overview", page_icon=":material/calendar_today:", layout="wide")
-
 # Render Global Sidebar and get config
 config = render_sidebar()
 selected_date = st.session_state.get('selected_date', datetime.datetime.now().date())

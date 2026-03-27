@@ -6,8 +6,6 @@ import plotly.express as px
 import datetime
 import re
 
-st.set_page_config(page_title="Historical Trends", page_icon=":material/trending_up:", layout="wide")
-
 # Render Global Sidebar and get config
 config = render_sidebar()
 

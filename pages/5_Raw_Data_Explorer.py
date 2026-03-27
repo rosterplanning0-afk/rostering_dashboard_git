@@ -10,8 +10,6 @@ from src.reconciliation import (
 from src.ui_components import render_sidebar
 from datetime import datetime
 
-st.set_page_config(page_title="Raw Data Explorer", page_icon=":material/folder_open:", layout="wide")
-
 # Render Global Sidebar and get config
 config = render_sidebar()
 selected_date = st.session_state.get('selected_date', datetime.now().date())

@@ -6,8 +6,6 @@ from datetime import datetime, timedelta
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="Fairness & Fatigue", page_icon=":material/balance:", layout="wide")
-
 # Render Global Sidebar and get config
 config = render_sidebar()
 st.markdown("### Select Time Range")

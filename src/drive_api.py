@@ -3,6 +3,7 @@ import io
 import json
 import tempfile
 from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 from dotenv import load_dotenv
@@ -13,48 +14,65 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 UPLOAD_SCOPES = ['https://www.googleapis.com/auth/drive']
 
 
+def _parse_creds(creds_info, scopes):
+    """Detects and returns the correct credential object from dictionary info."""
+    if "client_email" in creds_info and "private_key" in creds_info:
+        from google.oauth2 import service_account
+        return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+    elif "refresh_token" in creds_info or "token" in creds_info:
+        from google.oauth2.credentials import Credentials
+        return Credentials.from_authorized_user_info(creds_info, scopes=scopes)
+    raise ValueError("Unrecognized credential format. Missing either 'client_email' (Service Account) or 'refresh_token' (OAuth).")
+
+def _parse_file(filepath, scopes):
+    """Detects and returns the correct credential object from a file."""
+    with open(filepath, 'r') as f:
+        creds_info = json.load(f)
+    return _parse_creds(creds_info, scopes)
+
 def get_google_credentials(scopes):
-    """Retrieves Google service account credentials supporting Streamlit secrets, env vars, and local file."""
-    # 1. Try Streamlit Secrets (if running in a Streamlit app)
+    """Retrieves Google API credentials supporting Streamlit secrets, env vars, and local files (OAuth or Service Account)."""
+    
+    # 1. Try Streamlit Secrets
     try:
         import streamlit as st
-        # Option A: TOML dictionary mapping [gcp_service_account]
+        # Option A: Dictionary style
         if "gcp_service_account" in st.secrets:
-            creds_info = dict(st.secrets["gcp_service_account"])
-            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
-        
-        # Option B: Multi-line JSON string stored as GOOGLE_SERVICE_ACCOUNT_JSON
-        if "GOOGLE_SERVICE_ACCOUNT_JSON" in st.secrets:
-            creds_json = st.secrets["GOOGLE_SERVICE_ACCOUNT_JSON"]
-            creds_info = json.loads(creds_json, strict=False)
-            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+            return _parse_creds(dict(st.secrets["gcp_service_account"]), scopes)
             
-        # Option C: JSON string stored as GOOGLE_CREDENTIALS_JSON
-        if "GOOGLE_CREDENTIALS_JSON" in st.secrets:
-            creds_json = st.secrets["GOOGLE_CREDENTIALS_JSON"]
-            creds_info = json.loads(creds_json, strict=False)
-            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+        # Option B: Multi-line strings
+        for secret_key in ["GOOGLE_OAUTH_TOKEN", "GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_CREDENTIALS_JSON"]:
+            if secret_key in st.secrets:
+                creds_info = json.loads(st.secrets[secret_key], strict=False)
+                return _parse_creds(creds_info, scopes)
     except Exception as e:
         print(f"Failed to load from st.secrets: {e}")
         pass
 
-    # 2. Try JSON string from environment variable (Useful for Docker/CI)
-    for env_var in ["GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_CREDENTIALS_JSON"]:
-        creds_json = os.environ.get(env_var)
-        if creds_json:
-            creds_info = json.loads(creds_json, strict=False)
-            return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
+    # 2. Try JSON strings from environment variables
+    for env_key in ["GOOGLE_OAUTH_TOKEN", "GOOGLE_SERVICE_ACCOUNT_JSON", "GOOGLE_CREDENTIALS_JSON"]:
+        env_val = os.environ.get(env_key)
+        if env_val:
+            try:
+                creds_info = json.loads(env_val, strict=False)
+                return _parse_creds(creds_info, scopes)
+            except Exception:
+                pass
 
-    # 3. Fallback to local JSON credentials file (Usually for local development)
-    cred_path = os.environ.get('GOOGLE_CREDENTIALS_PATH', 'google_credentials.json').strip('"\'')
-    if os.path.exists(cred_path):
-        return service_account.Credentials.from_service_account_file(cred_path, scopes=scopes)
-        
-    # Extra fallback just in case the env var is messed up but the file is there
-    if os.path.exists('google_credentials.json'):
-        return service_account.Credentials.from_service_account_file('google_credentials.json', scopes=scopes)
+    # 3. Try local files
+    for path_key in ["GOOGLE_OAUTH_TOKEN_PATH", "GOOGLE_CREDENTIALS_PATH"]:
+        cred_path = os.environ.get(path_key, '')
+        if cred_path:
+            cred_path = cred_path.strip('"\'')
+            if os.path.exists(cred_path):
+                return _parse_file(cred_path, scopes)
+                
+    # 4. Fallback default files
+    for default_path in ['token.json', 'google_credentials.json']:
+        if os.path.exists(default_path):
+            return _parse_file(default_path, scopes)
 
-    raise FileNotFoundError("Google API credentials not found in st.secrets, ENV, or local file.")
+    raise FileNotFoundError("Google API credentials not found in st.secrets, ENV, or standard local files.")
 
 def get_google_drive_folder_id():
     """Retrieves the Google Drive Folder ID supporting Streamlit secrets and env vars."""
