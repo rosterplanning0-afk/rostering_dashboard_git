@@ -4,7 +4,8 @@ st.set_page_config(
     page_title="Staff Roster Analytics",
     page_icon=":material/train:",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    # initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # Define pages (hiding the old app.py splash screen content)

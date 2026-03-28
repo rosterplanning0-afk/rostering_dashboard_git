@@ -25,7 +25,13 @@ def render_sidebar():
         st.rerun()
 
     st.sidebar.markdown("#### :material/business: Select Department")
-    dept_options = list(config['departments'].keys())
+    
+    # ── Respect enabled_filters from config.json ─────────────────────────────
+    # To enable more departments/roles in future, edit config.json → enabled_filters
+    enabled_depts  = config.get('enabled_filters', {}).get('departments', list(config['departments'].keys()))
+    enabled_roles  = config.get('enabled_filters', {}).get('roles', [])
+    
+    dept_options = [d for d in config['departments'].keys() if d in enabled_depts]
     
     # Init state
     if 'selected_dept' not in st.session_state:
@@ -45,10 +51,14 @@ def render_sidebar():
         help="Select the department to filter data"
     )
     
+    # Build the role list filtered by both dept and enabled_roles
     role_options = ["All"]
     if selected_dept != "All":
         roles_dict = config['departments'][selected_dept]
-        role_options = ["All"] + list(roles_dict.values())
+        all_roles_in_dept = list(roles_dict.values())
+        if enabled_roles:
+            all_roles_in_dept = [r for r in all_roles_in_dept if r in enabled_roles]
+        role_options = ["All"] + all_roles_in_dept
         
     # If the department changed, we must urgently reset the role and trigger a rerun
     if selected_dept != current_dept:
@@ -69,5 +79,6 @@ def render_sidebar():
     if selected_role != current_role:
         st.session_state['selected_role'] = selected_role
         st.rerun()
+
     
     return config

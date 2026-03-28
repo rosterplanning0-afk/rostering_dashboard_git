@@ -16,6 +16,7 @@ tests/
 google_credentials.json
 desktop_client_credentials.json
 token.json
+work.txt
 
 # ── Temporary output files ───────────────────────────────────────────────────
 uncat_summary.txt

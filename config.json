@@ -20,6 +20,16 @@
       "CC": "Chief Controller"
     }
   },
+  "enabled_filters": {
+    "_comment": "Control which departments and designations appear in the sidebar. To enable a department or role in future, add it to the lists below.",
+    "departments": [
+      "Train Operations"
+    ],
+    "roles": [
+      "Train Operators",
+      "Train Attendants"
+    ]
+  },
   "duty_mapping": [
     {
       "pattern": ".*TRAINING DUTY.*|.*LRD AND HANDELING.*",
