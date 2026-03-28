@@ -384,9 +384,77 @@ with tab2:
                      color='Time of Day', color_discrete_sequence=px.colors.sequential.Viridis)
         st.plotly_chart(fig_shift, use_container_width=True)
         
-        st.markdown("### Active Personnel by Shift")
-        st.dataframe(shift_df[['name', 'emp_id', 'shift_start', 'shift_end', 'shift_category', 'crew_type', 'duty_category']], 
-                     use_container_width=True, hide_index=True)
+        st.markdown("### 🌙 Night & Early Morning Sign On / Sign Off Tracker")
+        st.markdown("Tracking staff movements from 07:00 PM to 06:30 AM.")
+        
+        # Helper to classify times into intervals
+        def get_interval(time_str):
+            if pd.isna(time_str) or not str(time_str).strip():
+                return None
+            try:
+                t_str = str(time_str).strip()
+                # Assuming HH:MM format
+                parts = t_str.split(':')
+                if len(parts) < 2: return None
+                hour = int(parts[0])
+                minute = int(parts[1])
+                
+                if hour == 19: return "19:00 - 20:00"
+                elif hour == 20: return "20:00 - 21:00"
+                elif hour == 21: return "21:00 - 22:00"
+                elif hour == 22: return "22:00 - 23:00"
+                elif hour == 23: return "23:00 - 00:00"
+                elif hour == 0: return "00:00 - 01:00"
+                elif hour == 1: return "01:00 - 02:00"
+                elif hour == 2: return "02:00 - 03:00"
+                elif hour == 3: return "03:00 - 04:00"
+                elif hour == 4: return "04:00 - 05:00"
+                elif hour == 5: return "05:00 - 06:00"
+                elif hour == 6 and minute <= 30: return "06:00 - 06:30"
+                return None
+            except:
+                return None
+        
+        # Calculate intervals
+        shift_df['sign_on_interval'] = shift_df['shift_start'].apply(get_interval)
+        shift_df['sign_off_interval'] = shift_df['shift_end'].apply(get_interval)
+        
+        # Base intervals in correct order
+        intervals = [
+            "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00", "22:00 - 23:00", "23:00 - 00:00",
+            "00:00 - 01:00", "01:00 - 02:00", "02:00 - 03:00", "03:00 - 04:00", "04:00 - 05:00",
+            "05:00 - 06:00", "06:00 - 06:30"
+        ]
+        
+        sign_on_counts = shift_df['sign_on_interval'].value_counts()
+        # The user requested sign off from 07:00pm to 06:00am, so it skips the 06:30 block theoretically, 
+        # but we can display the 06:00-06:30 interval if it exists, or just show 0 if not needed.
+        sign_off_counts = shift_df['sign_off_interval'].value_counts()
+        
+        table_data = []
+        tot_on = 0
+        tot_off = 0
+        for interval in intervals:
+            on_count = sign_on_counts.get(interval, 0)
+            off_count = sign_off_counts.get(interval, 0)
+            table_data.append({
+                "Time Interval": interval,
+                "Sign ON Count": on_count,
+                "Sign OFF Count": off_count
+            })
+            tot_on += on_count
+            tot_off += off_count
+            
+        tracker_df = pd.DataFrame(table_data)
+        
+        # Append total row
+        tracker_df.loc[len(tracker_df)] = {
+            "Time Interval": "TOTAL",
+            "Sign ON Count": tot_on,
+            "Sign OFF Count": tot_off
+        }
+        
+        st.dataframe(tracker_df, hide_index=True, use_container_width=True)
     else:
         st.info(f"No shifts found for {selected_date}.")
 

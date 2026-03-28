@@ -556,7 +556,7 @@
         "RRTS Spare/protection duty": 8,
         "MRTS Duty": 26,
         "MRTS stand by duty": 3,
-        "MRTS Spare/protection duty": 8,
+        "MRTS Spare/protection duty": 6,
         "Shuttle Duty": 5,
         "General Spare/protection duty": 1
       },
