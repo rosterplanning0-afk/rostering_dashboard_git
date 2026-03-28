@@ -68,7 +68,7 @@ with col1:
         st.dataframe(
             display_df,
             hide_index=True,
-            use_container_width=True,
+            width='stretch',
             column_config={
                 "department": "Department",
                 "designation": "Designation / Role",

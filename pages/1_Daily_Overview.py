@@ -282,10 +282,14 @@ with tab1:
                             required_plan.get('total_shift_duty_required', ''),
                         ]
                         
+                        # Convert "Required Count" to nullable integer so PyArrow can serialize it.
+                        # Empty strings from get_required_for_duty() become pd.NA instead of causing a type error.
+                        shift_df["Required Count"] = pd.to_numeric(shift_df["Required Count"], errors="coerce").astype("Int64")
+                        
                         st.dataframe(
                             shift_df.style.apply(style_shift_shortfall, axis=1),
                             hide_index=True,
-                            use_container_width=True,
+                            width='stretch',
                         )
                         st.caption("Headcount highlighted in red indicates mismatch versus Required Count.")
                         if required_plan.get('total_count'):
@@ -298,7 +302,7 @@ with tab1:
                     if leave_counts:
                         leave_df = pd.DataFrame({"Leave Type": list(leave_counts.keys()), "Headcount": list(leave_counts.values())})
                         leave_df.loc[len(leave_df)] = ["Total Leaves", sum(leave_counts.values())]
-                        st.dataframe(leave_df, hide_index=True, use_container_width=True)
+                        st.dataframe(leave_df, hide_index=True, width='stretch')
                         if required_plan.get('maximum_leave_per_day') is not None:
                             st.caption(
                                 f"Maximum Leave that can be given Per day: {required_plan.get('maximum_leave_per_day')}"
@@ -315,7 +319,7 @@ with tab1:
                     if wo_counts:
                         wo_df = pd.DataFrame({"Type": list(wo_counts.keys()), "Headcount": list(wo_counts.values())})
                         wo_df.loc[len(wo_df)] = ["Total", sum(wo_counts.values())]
-                        st.dataframe(wo_df, hide_index=True, use_container_width=True)
+                        st.dataframe(wo_df, hide_index=True, width='stretch')
                         if required_plan.get('ideal_weekly_off_per_day') is not None:
                             st.caption(
                                 f"Weekly Off target per day: {required_plan.get('ideal_weekly_off_per_day')}"
@@ -340,7 +344,7 @@ with tab1:
             
             fig = px.pie(cat_counts, values='Count', names='Category', 
                          hole=0.4, color_discrete_sequence=px.colors.qualitative.Pastel)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         st.markdown("---")
         st.markdown("### 📋 Rostered Personnel List")
@@ -357,7 +361,7 @@ with tab1:
             
             st.dataframe(
                 filtered_personnel_df[['name', 'emp_id', 'duty_code_raw', 'shift_start', 'shift_end', 'crew_type', 'duty_category']], 
-                hide_index=True, use_container_width=True
+                hide_index=True, width='stretch'
             )
 
     else:
@@ -382,7 +386,7 @@ with tab2:
         
         fig_shift = px.bar(shift_counts_bar, x='Time of Day', y='Total Staff', text='Total Staff',
                      color='Time of Day', color_discrete_sequence=px.colors.sequential.Viridis)
-        st.plotly_chart(fig_shift, use_container_width=True)
+        st.plotly_chart(fig_shift, width='stretch')
         
         st.markdown("### 🌙 Night & Early Morning Sign On / Sign Off Tracker")
         st.markdown("Tracking staff movements from 07:00 PM to 06:30 AM.")
@@ -454,7 +458,7 @@ with tab2:
             "Sign OFF Count": tot_off
         }
         
-        st.dataframe(tracker_df, hide_index=True, use_container_width=True)
+        st.dataframe(tracker_df, hide_index=True, width='stretch')
     else:
         st.info(f"No shifts found for {selected_date}.")
 
@@ -473,11 +477,11 @@ with tab3:
                 fig_leave = px.pie(leave_counts_pie, values='Count', names='Leave Type', hole=0.3,
                              title="Distribution of Absences & Leaves",
                              color_discrete_sequence=["#F97316", "#F59E0B", "#FBBF24", "#FDE68A"])
-                st.plotly_chart(fig_leave, use_container_width=True)
+                st.plotly_chart(fig_leave, width='stretch')
                 
             with colL2:
                 st.markdown("#### Staff on Leave / Absent")
-                st.dataframe(leave_df_full[['emp_id', 'duty_category', 'duty_code']], use_container_width=True, hide_index=True)
+                st.dataframe(leave_df_full[['emp_id', 'duty_category', 'duty_code']], width='stretch', hide_index=True)
         else:
             st.info(f"No leaves or absences logged for {selected_date} matching the current filters.")
     else:

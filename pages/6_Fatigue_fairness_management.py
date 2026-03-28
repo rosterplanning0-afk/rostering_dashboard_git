@@ -311,9 +311,9 @@ if not df.empty:
     # Display in Tabs
     t1, t2, t3 = st.tabs(["Master Roster Grid", "Daily Working Hours", "Weekly Hours Compliance Report"])
     with t1:
-        st.dataframe(styled_grid, use_container_width=True, height=600, hide_index=True)
+        st.dataframe(styled_grid, width='stretch', height=600, hide_index=True)
     with t2:
-        st.dataframe(styled_hours_grid, use_container_width=True, height=600, hide_index=True)
+        st.dataframe(styled_hours_grid, width='stretch', height=600, hide_index=True)
     
     # Calculate Total Working Hours and Fairness KPIs
     st.markdown("### :material/bar_chart: Metrics & KPIs")
@@ -386,7 +386,7 @@ if not df.empty:
                 if date_col in wide_df.columns:
                     styled_df = styled_df.format(lambda x: x if pd.notna(x) else "", subset=[date_col])
                     
-            st.dataframe(styled_df, use_container_width=True, hide_index=True)
+            st.dataframe(styled_df, width='stretch', hide_index=True)
         else:
             st.info("No cycle data available under the current filters.")
 
@@ -409,7 +409,7 @@ if not df.empty:
                                  title="Distribution of Working Hours",
                                  labels={'total_hours': 'Total Monthly Hours', 'count': 'Number of Employees'},
                                  color_discrete_sequence=['#2563EB'])
-        st.plotly_chart(fig_hours, use_container_width=True)
+        st.plotly_chart(fig_hours, width='stretch')
         
     with c_right:
         st.markdown("#### Duty Type Allocation Check")
@@ -433,7 +433,7 @@ if not df.empty:
         
         fig_pie = px.pie(shift_mix, values='Total Instances', names='Shift Type', hole=0.4,
                          color_discrete_sequence=["#2563EB", "#3B82F6", "#93C5FD", "#F59E0B"])
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width='stretch')
         
     
     if selected_employee != "All" and not cycle_summary.empty:
@@ -448,10 +448,10 @@ if not df.empty:
                                 color_discrete_map={"Normal": "#2563EB", "High Workload (>48h)": "#EF4444"},
                                 title="Consecutive Working Hours per Work Week")
             fig_cycles.update_traces(texttemplate='%{text:.1f}h', textposition='outside')
-            st.plotly_chart(fig_cycles, use_container_width=True)
+            st.plotly_chart(fig_cycles, width='stretch')
 
     st.markdown("#### Detailed Hours Leaderboard")
-    st.dataframe(emp_summary, use_container_width=True)
+    st.dataframe(emp_summary, width='stretch')
 
 else:
     st.info("No data available for the selected month window.")

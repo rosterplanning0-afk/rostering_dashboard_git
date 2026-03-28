@@ -63,7 +63,7 @@ def load_trend_data(start_str, end_str, _config, selected_dept, selected_role):
             'leave_count': len(x[_is_leave(x['duty_category']) & (x['duty_category'].str.strip().str.lower() != 'absent')]),
             'absent_count': len(x[x['duty_category'].str.strip().str.lower() == 'absent']),
             'weekly_off_count': len(x[x['duty_category'] == 'Weekly Off'])
-        })).reset_index()
+        }), include_groups=False).reset_index()
         
         return grouped.sort_values(by='date')
         
@@ -92,7 +92,7 @@ else:
                            title="Daily On-Duty Count",
                            labels={'on_duty_count': 'Total Staff', 'date': 'Date'},
                            color_discrete_sequence=['#2563EB'])
-        st.plotly_chart(fig_duty, use_container_width=True)
+        st.plotly_chart(fig_duty, width='stretch')
         
         st.markdown("### Absences & Leave Trends")
         # Melt dataframe to show multiple lines
@@ -109,7 +109,7 @@ else:
         fig_leaves = px.line(melted_df, x='date', y='Count', color='Status', markers=True,
                              title="Absences, Offs, and Leaves Breakdown",
                              color_discrete_map={'Total Leaves': '#F59E0B', 'Absences': '#EF4444', 'Weekly Off (WO)': '#64748B'})
-        st.plotly_chart(fig_leaves, use_container_width=True)
+        st.plotly_chart(fig_leaves, width='stretch')
         
         st.markdown("### Detailed Summary Table")
         display_df = df.copy()
@@ -122,7 +122,7 @@ else:
         # Add Total row calculation
         display_df['Total'] = display_df['On Duty'] + display_df['Leaves'] + display_df['Absent'] + display_df['Weekly Off']
         
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.dataframe(display_df, width='stretch', hide_index=True)
         
         st.markdown("---")
         st.markdown("### Employee Wise Shift Duty Matrix")
@@ -196,7 +196,7 @@ else:
                     pivot_df = pd.pivot_table(df_matrix, index=['emp_id', 'name', 'crew_type'], columns='Duty_Type', aggfunc='size', fill_value=0).reset_index()
                     pivot_df = pivot_df.rename(columns={'emp_id': 'Emp ID', 'name': 'Name', 'crew_type': 'Designation'})
                     
-                    st.dataframe(pivot_df, use_container_width=True, hide_index=True)
+                    st.dataframe(pivot_df, width='stretch', hide_index=True)
                 else:
                     st.info("No matrix data available.")
             else:

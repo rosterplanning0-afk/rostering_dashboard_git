@@ -76,7 +76,7 @@ if uploaded_file is not None and both_selected:
     if st.button(
         ":material/cloud_upload: Upload & Sync",
         type="primary",
-        use_container_width=False,
+        width='content',
     ):
         if not FOLDER_ID or FOLDER_ID == "your-folder-id":
             st.error(

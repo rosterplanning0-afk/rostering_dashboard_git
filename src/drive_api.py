@@ -10,8 +10,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
-UPLOAD_SCOPES = ['https://www.googleapis.com/auth/drive']
+# Use a single full scope so the stored OAuth token always covers both read and write.
+# Narrower scopes like drive.readonly can cause 'invalid_scope' if the saved token
+# was originally authorized with the full 'drive' scope (and vice-versa).
+SCOPES = ['https://www.googleapis.com/auth/drive']
+UPLOAD_SCOPES = SCOPES  # same scope for both operations
 
 
 def _parse_creds(creds_info, scopes):
@@ -21,7 +24,10 @@ def _parse_creds(creds_info, scopes):
         return service_account.Credentials.from_service_account_info(creds_info, scopes=scopes)
     elif "refresh_token" in creds_info or "token" in creds_info:
         from google.oauth2.credentials import Credentials
-        return Credentials.from_authorized_user_info(creds_info, scopes=scopes)
+        # For OAuth user tokens, do NOT pass 'scopes' — the token already
+        # embeds the scopes it was authorized with. Passing a different set
+        # causes Google to return 'invalid_scope: Bad Request'.
+        return Credentials.from_authorized_user_info(creds_info)
     raise ValueError("Unrecognized credential format. Missing either 'client_email' (Service Account) or 'refresh_token' (OAuth).")
 
 def _parse_file(filepath, scopes):

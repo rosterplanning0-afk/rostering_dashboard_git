@@ -53,7 +53,7 @@ if not df.empty:
         st.warning(
             f"{len(roster_gap_df)} rostered staff are missing from the active employee master for the current filters."
         )
-        st.dataframe(roster_gap_df, use_container_width=True, hide_index=True)
+        st.dataframe(roster_gap_df, width='stretch', hide_index=True)
 
     st.markdown("### Full Data Explorer")
 
@@ -70,7 +70,7 @@ if not df.empty:
     if status_filter != 'All':
         filtered_df = filtered_df[filtered_df['status'] == status_filter]
         
-    st.dataframe(filtered_df, use_container_width=True, hide_index=True)
+    st.dataframe(filtered_df, width='stretch', hide_index=True)
     
     # Download Button
     csv = filtered_df.to_csv(index=False).encode('utf-8')
