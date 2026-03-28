@@ -70,18 +70,4 @@ def render_sidebar():
         st.session_state['selected_role'] = selected_role
         st.rerun()
     
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### :material/admin_panel_settings: Admin Actions")
-    
-    force_sync = st.sidebar.checkbox("Bypass 8-Hour Sync Filter", value=False, help="Forces a full resync of all rosters in the Drive directory regardless of modification date")
-    
-    if st.sidebar.button(":material/sync: Sync New Rosters"):
-        with st.spinner("Fetching from Drive..."):
-            from src.processor import process_new_rosters
-            result = process_new_rosters(force_all=force_sync)
-            if result and result.get("status") == "success":
-                st.sidebar.success(result.get("message"))
-            else:
-                st.sidebar.error(result.get("message", "Unknown error occurred."))
-                
     return config
