@@ -87,6 +87,11 @@
       "status": "Active"
     },
     {
+      "pattern": "^MH\\d+$",
+      "category": "MRTS Stand by Duty",
+      "status": "Active"
+    },
+    {
       "pattern": "^TO-",
       "category": "On Duty",
       "status": "Active"
@@ -218,6 +223,11 @@
     },
     {
       "pattern": "^BHSB",
+      "category": "RRTS stand by duty",
+      "status": "Active"
+    },
+    {
+      "pattern": "^CHSB",
       "category": "RRTS stand by duty",
       "status": "Active"
     },

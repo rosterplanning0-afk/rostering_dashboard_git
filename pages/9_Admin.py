@@ -1,8 +1,12 @@
 import streamlit as st
 from src.processor import process_new_rosters
+from src.ui_components import render_sidebar
+
+config = render_sidebar()
 
 st.title(":material/admin_panel_settings: Administration")
-st.markdown("### Roster Synchronization")
+st.markdown("---")
+st.markdown("### :material/sync: Roster Synchronization")
 
 force_sync = st.checkbox(
     "Bypass 8-Hour Sync Filter", 
@@ -17,3 +21,4 @@ if st.button(":material/sync: Sync New Rosters", type="primary"):
             st.success(result.get("message"))
         else:
             st.error(result.get("message", "Unknown error occurred."))
+
