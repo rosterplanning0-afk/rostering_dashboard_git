@@ -139,11 +139,11 @@ def get_capacity_counts(config, selected_dept, selected_role):
 def style_shift_shortfall(row):
     """Highlight Headcount cell in red when headcount mismatches required."""
     styles = [''] * len(row)
-    if 'Headcount' not in row.index or 'Required Count' not in row.index:
+    if 'Headcount' not in row.index or 'Required' not in row.index:
         return styles
 
     headcount = pd.to_numeric(row['Headcount'], errors='coerce')
-    required = pd.to_numeric(row['Required Count'], errors='coerce')
+    required = pd.to_numeric(row['Required'], errors='coerce')
     if pd.notna(headcount) and pd.notna(required) and headcount < required:
         head_idx = list(row.index).index('Headcount')
         styles[head_idx] = 'background-color: #f8d7da; color: #8b1e24; font-weight: 700;'
@@ -246,7 +246,7 @@ with tab1:
                     else:
                         shift_counts[k] = v
                         
-                colA, colB, colC = st.columns(3)
+                colA, colB, colC = st.columns([2, 1, 1])
                 
                 with colA:
                     st.markdown("#### Shift Duty")
@@ -272,7 +272,7 @@ with tab1:
                         shift_df = pd.DataFrame({
                             "Duty Type": ordered_shifts,
                             "Headcount": [shift_counts[k] for k in ordered_shifts],
-                            "Required Count": [get_required_for_duty(k, duty_required_norm) for k in ordered_shifts],
+                            "Required": [get_required_for_duty(k, duty_required_norm) for k in ordered_shifts],
                         })
                         
                         total_sum = sum(shift_counts.values())
@@ -282,16 +282,16 @@ with tab1:
                             required_plan.get('total_shift_duty_required', ''),
                         ]
                         
-                        # Convert "Required Count" to nullable integer so PyArrow can serialize it.
+                        # Convert "Required" to nullable integer so PyArrow can serialize it.
                         # Empty strings from get_required_for_duty() become pd.NA instead of causing a type error.
-                        shift_df["Required Count"] = pd.to_numeric(shift_df["Required Count"], errors="coerce").astype("Int64")
+                        shift_df["Required"] = pd.to_numeric(shift_df["Required"], errors="coerce").astype("Int64")
                         
                         st.dataframe(
                             shift_df.style.apply(style_shift_shortfall, axis=1),
                             hide_index=True,
                             width='stretch',
                         )
-                        st.caption("Headcount highlighted in red indicates mismatch versus Required Count.")
+                        st.caption("Headcount highlighted in red indicates mismatch versus Required.")
                         if required_plan.get('total_count'):
                             st.caption(f"Total Count (Required): {required_plan.get('total_count')}")
                     else:
@@ -451,7 +451,6 @@ with tab2:
             
         tracker_df = pd.DataFrame(table_data)
         
-        # Append total row
         tracker_df.loc[len(tracker_df)] = {
             "Time Interval": "TOTAL",
             "Sign ON Count": tot_on,
@@ -459,6 +458,40 @@ with tab2:
         }
         
         st.dataframe(tracker_df, hide_index=True, width='stretch')
+        
+        st.markdown("#### Staff Detailed View")
+        
+        # Merge shift_df with emp_df to get the coordinates
+        # Since emp_df is fetched from employee master, it includes the newly added columns
+        if 'geo_location_link' not in emp_df.columns:
+            emp_df['geo_location_link'] = None
+            emp_df['latitude'] = None
+            emp_df['longitude'] = None
+            emp_df['full_address'] = None
+            
+        tracker_view_df = pd.merge(
+            shift_df, 
+            emp_df[['employee_id', 'geo_location_link', 'latitude', 'longitude', 'full_address']], 
+            left_on='emp_id', right_on='employee_id', how='left'
+        )
+        
+        # Only retain rows relevant to the tracker (i.e. those with sign on or off in the specified timeframe)
+        tracker_view_df = tracker_view_df[tracker_view_df['sign_on_interval'].notna() | tracker_view_df['sign_off_interval'].notna()].copy()
+        
+        tracker_view_df = tracker_view_df[['emp_id', 'name', 'shift_start', 'shift_end', 'geo_location_link', 'latitude', 'longitude', 'full_address']]
+        tracker_view_df.rename(columns={
+            'emp_id': 'Emp ID',
+            'name': 'Employee Name',
+            'shift_start': 'Sign On Time',
+            'shift_end': 'Sign Off Time',
+            'geo_location_link': 'Geo Location Link',
+            'latitude': 'Latitude',
+            'longitude': 'Longitude',
+            'full_address': 'Full Address'
+        }, inplace=True)
+        
+        st.dataframe(tracker_view_df, hide_index=True, width='stretch')
+
     else:
         st.info(f"No shifts found for {selected_date}.")
 

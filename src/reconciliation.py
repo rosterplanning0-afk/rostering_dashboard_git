@@ -10,7 +10,7 @@ def load_employee_master(client):
         try:
             res = (
                 client.table("employees")
-                .select("employee_id, name, department, designation, status")
+                .select("employee_id, name, department, designation, status, geo_location_link, latitude, longitude, full_address")
                 .eq("status", status_val)
                 .execute()
             )
