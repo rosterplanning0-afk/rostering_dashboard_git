@@ -123,9 +123,10 @@ if uploaded_file is not None and both_selected:
             with st.status("Syncing all rosters from Google Drive…", expanded=True) as sync_status:
                 try:
                     st.write("🔄 Running roster sync pipeline…")
-                    result = process_new_rosters(force_all=False)
+                    result = process_new_rosters(force_all=False, force_file_id=file_id)
                     msg = (result or {}).get("message", "Sync finished.")
                     status_code = (result or {}).get("status", "info")
+
 
                     if status_code == "success":
                         sync_status.update(label="✅ Sync complete.", state="complete")

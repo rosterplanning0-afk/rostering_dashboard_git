@@ -10,7 +10,7 @@ load_dotenv()
 
 FOLDER_ID = get_google_drive_folder_id()
 
-def process_new_rosters(force_all=False):
+def process_new_rosters(force_all=False, force_file_id=None):
     """
     Main pipeline function:
     1. Fetches new IVU PDFs from Google Drive
@@ -71,7 +71,7 @@ def process_new_rosters(force_all=False):
         modified_time = file.get('modifiedTime', '')
         
         # 8-Hour Freshness Check
-        if not force_all and modified_time:
+        if not force_all and file_id != force_file_id and modified_time:
             try:
                 mod_dt = datetime.fromisoformat(modified_time.replace('Z', '+00:00'))
                 if mod_dt < threshold_time:
@@ -82,7 +82,7 @@ def process_new_rosters(force_all=False):
                 
         # Smart Skip Logic Avoids Redundant Work
         last_synced_modified = sync_history.get(file_id)
-        if not force_all and last_synced_modified and modified_time and modified_time <= str(last_synced_modified):
+        if not force_all and file_id != force_file_id and last_synced_modified and modified_time and modified_time <= str(last_synced_modified):
             # print(f"Skipping {file_name}: Already up to date (Modified: {modified_time}).")
             continue
             
