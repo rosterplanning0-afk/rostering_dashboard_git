@@ -32,7 +32,38 @@
   },
   "duty_mapping": [
     {
-      "pattern": ".*TRAINING DUTY.*|.*LRD AND HANDELING.*",
+      "_comment": "Keyword-based rules (checked first, case-insensitive)",
+      "pattern": ".*HANDELING.*",
+      "category": "Handelling Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*INDUCTION.*",
+      "category": "Induction Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*NBT.*",
+      "category": "Need base training",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*SAFETY\\s*TRAINING.*",
+      "category": "Safety Training",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*TABLE\\s*TALK.*",
+      "category": "Table Talk Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*GENERAL.*",
+      "category": "General Duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*TRAINING DUTY.*",
       "category": "Training",
       "status": "Inactive"
     },

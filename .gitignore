@@ -1,4 +1,55 @@
 # ── Virtual environment ──────────────────────────────────────────────────────
+project/.venv/
+project/venv/
+project/env/
+project/ENV/
+
+# ── Local data & PDFs (not committed) ───────────────────────────────────────
+project/data/
+project/example_pdfs/
+
+# ── Test / one-off scripts ───────────────────────────────────────────────────
+project/tests/
+
+# ── Secrets & credentials ────────────────────────────────────────────────────
+project/.env
+project/google_credentials.json
+project/desktop_client_credentials.json
+project/token.json
+project/work.txt
+
+# ── Temporary output files ───────────────────────────────────────────────────
+project/uncat_summary.txt
+project/uncategorized_duties.csv
+project/unassigned_crew_types.xlsx
+
+# ── Python cache ─────────────────────────────────────────────────────────────
+**/__pycache__/
+project/*.py[cod]
+project/*.pyo
+project/*.pyd
+project/*.pyc
+
+# ── Streamlit cache ──────────────────────────────────────────────────────────
+project/.streamlit/secrets.toml
+
+# ── OS / editor artefacts ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+project/*.egg-info/
+project/dist/
+project/build/
+# Added by code-review-graph
+.code-review-graph/
+
+.claude
+project
+# ── Virtual environment ──────────────────────────────────────────────────────
 .venv/
 venv/
 env/
@@ -24,7 +75,7 @@ uncategorized_duties.csv
 unassigned_crew_types.xlsx
 
 # ── Python cache ─────────────────────────────────────────────────────────────
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
@@ -32,15 +83,17 @@ __pycache__/
 
 # ── Streamlit cache ──────────────────────────────────────────────────────────
 .streamlit/secrets.toml
-
-# ── OS / editor artefacts ────────────────────────────────────────────────────
-.DS_Store
-Thumbs.db
-desktop.ini
-*.swp
-*.swo
-.idea/
-.vscode/settings.json
-*.egg-info/
-dist/
-build/
+.claudeignore
+.gemini
+.graphignore
+.agent
+GEMINI.md
+CLAUDE.md
+AGENTS.md
+.mcp.json
+.opencode.json
+.windsurfrules
+.windsurf.json
+GOOGLE_API_SETUP.md
+.cursorrules
+.cursor

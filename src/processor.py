@@ -10,7 +10,7 @@ load_dotenv()
 
 FOLDER_ID = get_google_drive_folder_id()
 
-def process_new_rosters(force_all=False, force_file_id=None):
+def process_new_rosters(force_all=False, force_file_id=None, time_window_minutes=480):
     """
     Main pipeline function:
     1. Fetches new IVU PDFs from Google Drive
@@ -63,14 +63,14 @@ def process_new_rosters(force_all=False, force_file_id=None):
         
     processed_count = 0
     
-    threshold_time = datetime.now(timezone.utc) - timedelta(hours=8)
+    threshold_time = datetime.now(timezone.utc) - timedelta(minutes=time_window_minutes)
     
     for file in pdf_files:
         file_id = file['id']
         file_name = file['name']
         modified_time = file.get('modifiedTime', '')
         
-        # 8-Hour Freshness Check
+        # Time Window Freshness Check
         if not force_all and file_id != force_file_id and modified_time:
             try:
                 mod_dt = datetime.fromisoformat(modified_time.replace('Z', '+00:00'))
@@ -110,6 +110,9 @@ def process_new_rosters(force_all=False, force_file_id=None):
         # JSON requires python standard types. Convert date objects to strings safely
         if not pd.api.types.is_string_dtype(df['date']):
             df['date'] = df['date'].astype(str)
+            
+        # Replace NaN with None for JSON compliance (Supabase/Postgrest doesn't like NaN)
+        df = df.replace({pd.NA: None}).where(pd.notnull(df), None)
             
         # Deduplicate within this dataframe to avoid Postgres constraint conflicts
         # For raw_records

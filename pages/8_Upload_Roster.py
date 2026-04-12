@@ -120,10 +120,16 @@ if uploaded_file is not None and both_selected:
 
         # ── Auto-sync phase ──────────────────────────────────────────────────
         if upload_ok:
-            with st.status("Syncing all rosters from Google Drive…", expanded=True) as sync_status:
+            with st.status("Syncing rosters from Google Drive (last 10 mins)…", expanded=True) as sync_status:
                 try:
+                    st.write("🔍 Verifying file availability on Google Drive…")
+                    # Fetching the file to confirm it is fully registered and available
+                    service.files().get(fileId=file_id, fields="id, name").execute()
+                    st.write("✅ File successfully registered on Google Drive.")
+
                     st.write("🔄 Running roster sync pipeline…")
-                    result = process_new_rosters(force_all=False, force_file_id=file_id)
+                    # Sync any file uploaded/modified within the last 10 minutes
+                    result = process_new_rosters(force_all=False, force_file_id=None, time_window_minutes=10)
                     msg = (result or {}).get("message", "Sync finished.")
                     status_code = (result or {}).get("status", "info")
 

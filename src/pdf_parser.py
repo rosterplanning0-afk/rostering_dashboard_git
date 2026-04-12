@@ -11,6 +11,27 @@ with open(CONFIG_PATH, 'r') as f:
     CONFIG = json.load(f)
 
 # ---------------------------------------------------------------------------
+# Load categorized_duties.csv for exact-match duty overrides
+# The CSV has two columns: duty_code (col 0) and category (col 1)
+# ---------------------------------------------------------------------------
+_CATEGORIZED_DUTIES_CSV = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'categorized_duties.csv')
+_EXACT_DUTY_MAP: dict = {}  # duty_code (uppercase) → category string
+
+if os.path.exists(_CATEGORIZED_DUTIES_CSV):
+    try:
+        _csv_df = pd.read_csv(_CATEGORIZED_DUTIES_CSV)
+        # The first column header is "Uncategorized list:" and the second is "categorized"
+        cols = _csv_df.columns.tolist()
+        for _, csv_row in _csv_df.iterrows():
+            raw_code = str(csv_row[cols[0]]).strip()
+            raw_cat = str(csv_row[cols[1]]).strip()
+            if raw_code and raw_cat and raw_code.lower() != 'nan' and raw_cat.lower() != 'nan':
+                _EXACT_DUTY_MAP[raw_code.upper()] = raw_cat
+        print(f"[pdf_parser] Loaded {len(_EXACT_DUTY_MAP)} exact duty overrides from categorized_duties.csv")
+    except Exception as e:
+        print(f"[pdf_parser] Warning: Could not load categorized_duties.csv: {e}")
+
+# ---------------------------------------------------------------------------
 # Crew-type resolver: splits composite crew_type strings like
 # "Crew Controller, Train Operators" by looking up the individual employee's
 # designation in the employees table.
@@ -119,14 +140,32 @@ def resolve_crew_type(crew_type: str, emp_id: str) -> str:
               f"— does not clearly match options for '{crew_type}'. Using: {default_val}")
         return default_val
 
+# Leave/inactive category keywords for status inference from CSV overrides
+_INACTIVE_KEYWORDS = {'leave', 'holiday', 'absent', 'off', 'weekly off', 'compensatory', 'deroster'}
+
 def categorize_duty(duty_string):
-    """Maps a raw duty string (which might contain linebreaks/times) to a standardized category."""
+    """Maps a raw duty string (which might contain linebreaks/times) to a standardized category.
+    
+    Priority order:
+      1. Exact match from categorized_duties.csv (_EXACT_DUTY_MAP)
+      2. Regex patterns from config.json (duty_mapping)
+      3. Fallback to 'Uncategorized'
+    """
     if not isinstance(duty_string, str) or not duty_string.strip():
         return 'Unknown', 'Inactive'
         
     duty_lines = str(duty_string).strip().split('\n')
     duty_code = duty_lines[0].strip() # Usually the first line is the duty code
     
+    # Priority 1: Check exact match from categorized_duties.csv
+    csv_category = _EXACT_DUTY_MAP.get(duty_code.upper())
+    if csv_category:
+        # Infer status: if the category name suggests leave/absence, mark Inactive
+        cat_lower = csv_category.lower()
+        status = 'Inactive' if any(kw in cat_lower for kw in _INACTIVE_KEYWORDS) else 'Active'
+        return csv_category, status
+    
+    # Priority 2: Regex patterns from config.json
     for mapping in CONFIG.get('duty_mapping', []):
         if re.search(mapping['pattern'], duty_code, re.IGNORECASE):
             return mapping['category'], mapping['status']
