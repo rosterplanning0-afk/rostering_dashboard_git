@@ -158,7 +158,7 @@ with st.spinner("Loading data from Supabase..."):
 # Apply global filters
 roster_df, raw_df, emp_df = apply_filters(roster_df, raw_df, emp_df, config)
 
-tab1, tab2, tab3 = st.tabs(["📊 Daily Overview", "⏰ Shift Analysis", "✈️ Leave Analytics"])
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Daily Overview", "⏰ Shift Analysis", "✈️ Leave Analytics", "🗺️ Staff Heatmap"])
 
 with tab1:
     if not raw_df.empty:
@@ -519,3 +519,57 @@ with tab3:
             st.info(f"No leaves or absences logged for {selected_date} matching the current filters.")
     else:
         st.info(f"No leaves or absences logged for {selected_date} matching the current filters.")
+        
+with tab4:
+    st.markdown("### 🗺️ Staff Geographic Heatmap")
+    if not emp_df.empty:
+        # emp_df has already been filtered by sidebar selections (Designation & Department) via apply_filters()
+        map_df = emp_df.dropna(subset=['latitude', 'longitude']).copy()
+        
+        # Make sure values are floats
+        map_df['latitude'] = pd.to_numeric(map_df['latitude'], errors='coerce')
+        map_df['longitude'] = pd.to_numeric(map_df['longitude'], errors='coerce')
+        map_df = map_df.dropna(subset=['latitude', 'longitude'])
+        
+        if not map_df.empty:
+            import pydeck as pdk
+            
+            # Heatmap layer for density
+            heatmap_layer = pdk.Layer(
+                "HeatmapLayer",
+                data=map_df,
+                get_position=["longitude", "latitude"],
+                opacity=0.8,
+                get_weight="1",
+            )
+            
+            # Invisible scatterplot layer for tooltip hover points
+            scatter_layer = pdk.Layer(
+                "ScatterplotLayer",
+                data=map_df,
+                get_position=["longitude", "latitude"],
+                get_color="[200, 30, 0, 160]",
+                get_radius=150,
+                pickable=True,
+            )
+
+            view_state = pdk.ViewState(
+                latitude=map_df["latitude"].mean(),
+                longitude=map_df["longitude"].mean(),
+                zoom=9,
+                pitch=10,
+            )
+            
+            st.pydeck_chart(pdk.Deck(
+                layers=[heatmap_layer, scatter_layer],
+                initial_view_state=view_state,
+                tooltip={
+                    "html": "<b>{name}</b><br/>{designation}<br/>{full_address}",
+                    "style": {"color": "white"}
+                }
+            ))
+            st.caption(f"Showing geographic location of {len(map_df)} staff members matching the current filters.")
+        else:
+            st.info("No geographic coordinates found for the selected staff members. Please ensure they have a Maps link in their profile.")
+    else:
+        st.info("No staff members match the current filters.")
