@@ -6,7 +6,7 @@ import pandas as pd
 def load_employee_master(client):
     """Load employee master rows using the status-scoped queries used by the dashboard."""
     all_emp_rows = []
-    for status_val in ["Active", "Inactive"]:
+    for status_val in ["Active", "Notice Period", "Inactive"]:
         try:
             res = (
                 client.table("employees")
@@ -43,7 +43,7 @@ def filter_active_employees(emp_df, selected_dept, selected_role):
 
     filtered = emp_df.copy()
     if "status" in filtered.columns:
-        filtered = filtered[filtered["status"] == "Active"]
+        filtered = filtered[filtered["status"].isin(["Active", "Notice Period"])]
 
     if selected_dept != "All" and "department" in filtered.columns:
         filtered = filtered[filtered["department"] == selected_dept]

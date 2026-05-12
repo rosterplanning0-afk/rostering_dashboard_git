@@ -15,7 +15,7 @@ client = get_supabase_client()
 def load_employees():
     """Load employees using filters to comply with RLS policies."""
     all_emps = []
-    for status_val in ['Active', 'Inactive']:
+    for status_val in ['Active', 'Notice Period', 'Inactive']:
         try:
             res = client.table("employees").select(
                 "employee_id, name, designation, department, status, gender, date_joined"

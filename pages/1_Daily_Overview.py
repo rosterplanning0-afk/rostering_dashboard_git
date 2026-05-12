@@ -167,7 +167,13 @@ with tab1:
         selected_role = st.session_state.get('selected_role', 'All')
         
         # Recompute metrics dynamically using case-insensitive leave detection
-        total_active_employees = len(emp_df) if not emp_df.empty else 0
+        # Recompute metrics dynamically
+        if not emp_df.empty:
+            active_only = len(emp_df[emp_df['status'] == 'Active'])
+            notice_only = len(emp_df[emp_df['status'] == 'Notice Period'])
+            total_active_employees = active_only + notice_only
+        else:
+            active_only = notice_only = total_active_employees = 0
         total_rostered = len(raw_df) if not raw_df.empty else 0
         unaccounted = max(0, total_active_employees - total_rostered) if total_active_employees > 0 else 0
         planned_count, approved_count = get_capacity_counts(config, selected_dept, selected_role)
@@ -188,9 +194,11 @@ with tab1:
             on_duty = absences = leaves = weekly_off = 0
         
         # Top level balancing metrics
-        m1, m2, m3, m4, m5 = st.columns(5)
-        with m1:
-            st.metric("Total Active Employees (DB)", total_active_employees)
+        m_a, m_n, m2, m3, m4, m5 = st.columns(6)
+        with m_a:
+            st.metric("Active Count", total_active_employees)
+        with m_n:
+            st.metric("Notice Period", notice_only)
         with m2:
             st.metric("Total Staff on Roster", total_rostered)
         with m3:
