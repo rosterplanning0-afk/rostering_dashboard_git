@@ -516,6 +516,16 @@
       "pattern": "^CO$",
       "category": "Compensatory Leave",
       "status": "Inactive"
+    },
+    {
+      "pattern": ".*INSPECTION.*",
+      "category": "Inspection",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*TRAINING.*",
+      "category": "Training",
+      "status": "Active"
     }
   ],
   "leave_categories": {
@@ -539,8 +549,8 @@
       "approved_count": 102
     },
     "Crew Controllers": {
-      "planned_count": 9,
-      "approved_count": 8
+      "planned_count": 10,
+      "approved_count": 10
     },
     "Station Controller": {
       "planned_count": 102,

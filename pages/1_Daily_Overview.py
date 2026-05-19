@@ -93,9 +93,24 @@ def categorize_shift_time(row):
         return 'Unknown'
 
 
-def get_required_plan(config, selected_role):
-    """Get required duty targets for the selected role from config."""
-    role_plan = config.get('required_counts', {}).get(selected_role, {})
+def get_required_plan(selected_role, selected_date):
+    """Get required duty targets for the selected role from DB based on selected date."""
+    client = get_supabase_client()
+    date_str = str(selected_date)
+    
+    # Query the role_required_counts table
+    res = client.table('role_required_counts')\
+        .select('*')\
+        .eq('role', selected_role)\
+        .lte('effective_date', date_str)\
+        .order('effective_date', desc=True)\
+        .limit(1)\
+        .execute()
+        
+    role_plan = {}
+    if res.data:
+        role_plan = res.data[0]
+        
     duty_required = role_plan.get('shift_duty_required', {})
     duty_required_norm = {str(k).strip().lower(): v for k, v in duty_required.items()}
     return role_plan, duty_required_norm
@@ -222,7 +237,7 @@ with tab1:
         st.markdown("---")
         
         # Make the expander dynamic based on the selected role
-        required_plan, duty_required_norm = get_required_plan(config, selected_role)
+        required_plan, duty_required_norm = get_required_plan(selected_role, selected_date)
         expander_title = "📋 Detailed Duty Breakdown"
         if selected_dept != "All":
             expander_title += f" ({selected_role})"

@@ -32,7 +32,7 @@ def load_trend_data(start_str, end_str, _config, selected_dept, selected_role):
     client = get_supabase_client()
     
     # Ensure raw strings are passed to Supabase
-    raw_data = fetch_all_by_date(client, 'raw_roster_data', start_str, end_str, 'emp_id, date, crew_type')
+    raw_data = fetch_all_by_date(client, 'raw_roster_data', start_str, end_str, 'emp_id, date, crew_type, shift_start, shift_end')
     proc_data = fetch_all_by_date(client, 'processed_roster', start_str, end_str, 'emp_id, date, duty_category')
     
     if raw_data and proc_data:
@@ -45,6 +45,36 @@ def load_trend_data(start_str, end_str, _config, selected_dept, selected_role):
             return pd.DataFrame()
         
         df['date'] = pd.to_datetime(df['date'])
+        
+        # Helper to classify times into intervals (from 1_Daily_Overview)
+        def get_interval(time_str):
+            if pd.isna(time_str) or not str(time_str).strip():
+                return None
+            try:
+                t_str = str(time_str).strip()
+                parts = t_str.split(':')
+                if len(parts) < 2: return None
+                hour = int(parts[0])
+                minute = int(parts[1])
+                
+                if hour == 19: return "19:00 - 20:00"
+                elif hour == 20: return "20:00 - 21:00"
+                elif hour == 21: return "21:00 - 22:00"
+                elif hour == 22: return "22:00 - 23:00"
+                elif hour == 23: return "23:00 - 00:00"
+                elif hour == 0: return "00:00 - 01:00"
+                elif hour == 1: return "01:00 - 02:00"
+                elif hour == 2: return "02:00 - 03:00"
+                elif hour == 3: return "03:00 - 04:00"
+                elif hour == 4: return "04:00 - 05:00"
+                elif hour == 5: return "05:00 - 06:00"
+                elif hour == 6 and minute <= 30: return "06:00 - 06:30"
+                return None
+            except:
+                return None
+        
+        df['sign_on_interval'] = df['shift_start'].apply(get_interval)
+        df['sign_off_interval'] = df['shift_end'].apply(get_interval)
         
         # Case-insensitive leave detection helper
         def _is_leave(series):
@@ -65,9 +95,9 @@ def load_trend_data(start_str, end_str, _config, selected_dept, selected_role):
             'weekly_off_count': len(x[x['duty_category'] == 'Weekly Off'])
         }), include_groups=False).reset_index()
         
-        return grouped.sort_values(by='date')
+        return grouped.sort_values(by='date'), df
         
-    return pd.DataFrame()
+    return pd.DataFrame(), pd.DataFrame()
 
 st.markdown("### Select Time Range")
 c1, c2, c3 = st.columns([1, 1, 2])
@@ -84,7 +114,7 @@ else:
         # Pass the session states as cache busters so changing the sidebar instantly updates the query
         selected_dept = st.session_state.get('selected_dept', 'All')
         selected_role = st.session_state.get('selected_role', 'All')
-        df = load_trend_data(str(start_date), str(end_date), config, selected_dept, selected_role)
+        df, raw_trends_df = load_trend_data(str(start_date), str(end_date), config, selected_dept, selected_role)
 
     if not df.empty:
         st.markdown("### On-Duty Staff Over Time")
@@ -123,6 +153,69 @@ else:
         display_df['Total'] = display_df['On Duty'] + display_df['Leaves'] + display_df['Absent'] + display_df['Weekly Off']
         
         st.dataframe(display_df, width='stretch', hide_index=True)
+        
+        st.markdown("---")
+        st.markdown("### 🌙 Night & Early Morning Tracker Trends")
+        st.markdown("Comparing staff movements (Sign ON/OFF) from 07:00 PM to 06:30 AM across the selected period.")
+        
+        if not raw_trends_df.empty:
+            # Base intervals in correct order
+            intervals = [
+                "19:00 - 20:00", "20:00 - 21:00", "21:00 - 22:00", "22:00 - 23:00", "23:00 - 00:00",
+                "00:00 - 01:00", "01:00 - 02:00", "02:00 - 03:00", "03:00 - 04:00", "04:00 - 05:00",
+                "05:00 - 06:00", "06:00 - 06:30"
+            ]
+            
+            # Helper to create pivot tables
+            def get_tracker_pivot(data_df, col_name):
+                valid_data = data_df[data_df[col_name].notna()].copy()
+                if valid_data.empty:
+                    return pd.DataFrame(columns=intervals + ['TOTAL'])
+                
+                pivot = valid_data.pivot_table(
+                    index=valid_data['date'].dt.strftime('%Y-%m-%d'),
+                    columns=col_name,
+                    aggfunc='size',
+                    fill_value=0
+                )
+                # Ensure all intervals are present
+                for col in intervals:
+                    if col not in pivot.columns:
+                        pivot[col] = 0
+                pivot = pivot[intervals]
+                pivot['TOTAL'] = pivot.sum(axis=1)
+                return pivot
+            
+            on_pivot = get_tracker_pivot(raw_trends_df, 'sign_on_interval')
+            off_pivot = get_tracker_pivot(raw_trends_df, 'sign_off_interval')
+            
+            tracker_tab1, tracker_tab2 = st.tabs(["Sign ON Analysis", "Sign OFF Analysis"])
+            
+            with tracker_tab1:
+                st.markdown("#### Night Sign ON Counts by Date")
+                st.dataframe(on_pivot, width='stretch')
+                
+                if not on_pivot.empty and on_pivot['TOTAL'].sum() > 0:
+                    fig_on_trend = px.line(on_pivot.reset_index(), x='index', y='TOTAL', markers=True, 
+                                         title="Total Night Sign-ONs Trend",
+                                         labels={'index': 'Date', 'TOTAL': 'Total Sign-ONs'})
+                    st.plotly_chart(fig_on_trend, width='stretch')
+                else:
+                    st.info("No Night Sign-ON data found for the selected period.")
+                    
+            with tracker_tab2:
+                st.markdown("#### Night Sign OFF Counts by Date")
+                st.dataframe(off_pivot, width='stretch')
+                
+                if not off_pivot.empty and off_pivot['TOTAL'].sum() > 0:
+                    fig_off_trend = px.line(off_pivot.reset_index(), x='index', y='TOTAL', markers=True, 
+                                         title="Total Night Sign-OFFs Trend",
+                                         labels={'index': 'Date', 'TOTAL': 'Total Sign-OFFs'})
+                    st.plotly_chart(fig_off_trend, width='stretch')
+                else:
+                    st.info("No Night Sign-OFF data found for the selected period.")
+        else:
+            st.info("No raw roster data available for tracker analysis.")
         
         st.markdown("---")
         st.markdown("### Employee Wise Shift Duty Matrix")
