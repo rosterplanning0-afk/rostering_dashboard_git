@@ -218,6 +218,11 @@
       "status": "Active"
     },
     {
+      "pattern": "^G-\\s*TECHNICAL\\s*SPARE",
+      "category": "Technical Spare (General shift)",
+      "status": "Active"
+    },
+    {
       "pattern": ".*SPARE.*MRTS.*",
       "category": "MRTS Spare/protection duty",
       "status": "Active"
@@ -238,11 +243,6 @@
       "status": "Active"
     },
     {
-      "pattern": "^G- TECHNICAL SPARE",
-      "category": "Technical Spare (General shift)",
-      "status": "Active"
-    },
-    {
       "pattern": "^MHSB",
       "category": "MRTS stand by duty",
       "status": "Active"
@@ -260,6 +260,16 @@
     {
       "pattern": "^CHSB",
       "category": "RRTS stand by duty",
+      "status": "Active"
+    },
+    {
+      "pattern": ".*CREW EXPOSURE.*",
+      "category": "Crew Exposure",
+      "status": "Active"
+    },
+    {
+      "pattern": "^[MENG]-LI.*",
+      "category": "Line Inspection",
       "status": "Active"
     },
     {

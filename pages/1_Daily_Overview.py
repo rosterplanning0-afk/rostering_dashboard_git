@@ -277,10 +277,31 @@ with tab1:
                         st.caption("Required targets are not configured for this designation in config.json.")
                     if shift_counts:
                         desired_order = [
-                            "RRTS Duty", "RRTS duty", "RRTS stand by duty", "RRTS Spare/protection duty", "Protection Duty RRTS",
-                            "MRTS Duty", "MRTS duty", "MRTS stand by duty", "MRTS Spare/protection duty", "Protection Duty MRTS",
-                            "On Duty", "Shuttle Duty", "Crew Duty", "Depot Duty", "Technical Spare (General shift)",
-                            "General Duty", "General Spare/protection duty", "Training", "Simulator", "Testing", "Safety Training"
+                            # RRTS first
+                            "RRTS Duty", "RRTS duty",
+                            "RRTS Spare/protection duty", "Protection Duty RRTS",
+                            "RRTS stand by duty", "RRTS Stand by Duty", "RRTS stand by Duty",
+                            # MRTS second
+                            "MRTS Duty", "MRTS duty",
+                            "MRTS Spare/protection duty", "Protection Duty MRTS",
+                            "MRTS stand by duty", "MRTS Stand by Duty", "MRTS stand by Duty",
+                            # Shuttle third
+                            "Shuttle Duty",
+                            # General fourth
+                            "General Duty",
+                            "General Spare/protection duty",
+                            "Technical Spare (General shift)",
+                            # Others
+                            "On Duty",
+                            "Crew Duty",
+                            "Depot Duty",
+                            "Crew Exposure",
+                            "Line Inspection",
+                            "Training",
+                            "Inspection",
+                            "Simulator",
+                            "Testing",
+                            "Safety Training"
                         ]
                         
                         ordered_shifts = []
