@@ -173,7 +173,7 @@ else:
                     return pd.DataFrame(columns=intervals + ['TOTAL'])
                 
                 pivot = valid_data.pivot_table(
-                    index=valid_data['date'].dt.strftime('%Y-%m-%d'),
+                    index=valid_data['date'].dt.strftime('%Y-%m-%d').rename('Date'),
                     columns=col_name,
                     aggfunc='size',
                     fill_value=0
@@ -196,9 +196,9 @@ else:
                 st.dataframe(on_pivot, width='stretch')
                 
                 if not on_pivot.empty and on_pivot['TOTAL'].sum() > 0:
-                    fig_on_trend = px.line(on_pivot.reset_index(), x='index', y='TOTAL', markers=True, 
+                    fig_on_trend = px.line(on_pivot.reset_index(), x='Date', y='TOTAL', markers=True, 
                                          title="Total Night Sign-ONs Trend",
-                                         labels={'index': 'Date', 'TOTAL': 'Total Sign-ONs'})
+                                         labels={'Date': 'Date', 'TOTAL': 'Total Sign-ONs'})
                     st.plotly_chart(fig_on_trend, width='stretch')
                 else:
                     st.info("No Night Sign-ON data found for the selected period.")
@@ -208,9 +208,9 @@ else:
                 st.dataframe(off_pivot, width='stretch')
                 
                 if not off_pivot.empty and off_pivot['TOTAL'].sum() > 0:
-                    fig_off_trend = px.line(off_pivot.reset_index(), x='index', y='TOTAL', markers=True, 
+                    fig_off_trend = px.line(off_pivot.reset_index(), x='Date', y='TOTAL', markers=True, 
                                          title="Total Night Sign-OFFs Trend",
-                                         labels={'index': 'Date', 'TOTAL': 'Total Sign-OFFs'})
+                                         labels={'Date': 'Date', 'TOTAL': 'Total Sign-OFFs'})
                     st.plotly_chart(fig_off_trend, width='stretch')
                 else:
                     st.info("No Night Sign-OFF data found for the selected period.")
