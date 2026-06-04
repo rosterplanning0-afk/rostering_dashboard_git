@@ -62,7 +62,9 @@ with col1:
         st.info("No explicit historical competencies recorded for this employee yet.")
     else:
         # Format for UI
-        display_df = comp_df[['department', 'designation', 'valid_from', 'valid_till', 'is_active', 'created_at']].copy()
+        expected_cols = ['department', 'designation', 'valid_from', 'valid_till', 'is_active', 'created_at']
+        available_cols = [c for c in expected_cols if c in comp_df.columns]
+        display_df = comp_df[available_cols].copy()
         
         # Apply strict data-dense styling
         st.dataframe(

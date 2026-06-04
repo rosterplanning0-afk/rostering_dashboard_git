@@ -20,8 +20,8 @@ profile_page      = st.Page("pages/7_Employee_Profile.py",             title="Co
 #    st.navigation() returns the currently selected page BEFORE running it,
 #    so we can use it to decide which CSS to apply. ───────────────────────────
 nav = st.navigation({
-    "Analytics":   [daily_overview, historical_trends, profile_page],
-    "Admin Tools": [admin_page, fatigue_page, raw_data_page, upload_roster],
+    "Analytics":   [daily_overview, historical_trends],
+    "Admin Tools": [admin_page, fatigue_page, raw_data_page, upload_roster, profile_page],
 })
 
 # Detect if the currently selected page is one of the admin section pages
@@ -42,6 +42,7 @@ else:
     [data-testid="stSidebarNavItems"] > div:has(li a[href*="Fatigue_fairness_management"]) { display: none !important; }
     [data-testid="stSidebarNavItems"] > div:has(li a[href*="Raw_Data_Explorer"]) { display: none !important; }
     [data-testid="stSidebarNavItems"] > div:has(li a[href*="Upload_Roster"]) { display: none !important; }
+    [data-testid="stSidebarNavItems"] > div:has(li a[href*="Employee_Profile"]) { display: none !important; }
     """
 
 st.markdown(f"<style>{hide_css}</style>", unsafe_allow_html=True)
