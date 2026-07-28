@@ -5,17 +5,17 @@ CL08:00-,Casual Leave
 CLWO,Casual Leave
 CLxNO,Casual Leave
 SL/CL,Casual Leave
-CMPL,Compasionate Leave
-CO,Compensatory Off
+CMPL,Compensatory OFF
+CO,Compensatory OFF
 SKAL PR WORK,General Duty
-LOP,Leave without Pay
-LWP,Leave without Pay
-LWPWO,Leave without Pay
+LOP,Leave Without Pay
+LWP,Leave Without Pay
+LWPWO,Leave Without Pay
 OH,Optional Holiday
 PH,Public Holiday
-CHSB-01 DEPOT,RRTS stand by duty
-CHSB-02 GHAZ,RRTS stand by duty
-CHSB-03 GHAZ,RRTS stand by duty
+CHSB-01 DEPOT,RRTS Stand by Duty
+CHSB-02 GHAZ,RRTS Stand by Duty
+CHSB-03 GHAZ,RRTS Stand by Duty
 SL,Sick Leave
 xNO,Weekly Off
 MH2,MRTS Stand by Duty

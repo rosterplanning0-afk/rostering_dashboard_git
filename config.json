@@ -244,22 +244,22 @@
     },
     {
       "pattern": "^MHSB",
-      "category": "MRTS stand by duty",
+      "category": "MRTS Stand by Duty",
       "status": "Active"
     },
     {
       "pattern": "^AHSB",
-      "category": "RRTS stand by duty",
+      "category": "RRTS Stand by Duty",
       "status": "Active"
     },
     {
       "pattern": "^BHSB",
-      "category": "RRTS stand by duty",
+      "category": "RRTS Stand by Duty",
       "status": "Active"
     },
     {
       "pattern": "^CHSB",
-      "category": "RRTS stand by duty",
+      "category": "RRTS Stand by Duty",
       "status": "Active"
     },
     {
@@ -319,7 +319,7 @@
     },
     {
       "pattern": "^RR-\\d+$",
-      "category": "RRTS duty",
+      "category": "RRTS Duty",
       "status": "Active"
     },
     {
@@ -359,7 +359,7 @@
     },
     {
       "pattern": "^CMPL$",
-      "category": "Compassionate Leave",
+      "category": "Compensatory OFF",
       "status": "Inactive"
     },
     {
@@ -419,12 +419,12 @@
     },
     {
       "pattern": "^LOP$",
-      "category": "Leave without Pay",
+      "category": "Leave Without Pay",
       "status": "Inactive"
     },
     {
       "pattern": "^LWP$",
-      "category": "Leave without Pay",
+      "category": "Leave Without Pay",
       "status": "Inactive"
     },
     {
@@ -439,7 +439,7 @@
     },
     {
       "pattern": "^PH$",
-      "category": "Public holiday",
+      "category": "Public Holiday",
       "status": "Inactive"
     },
     {
@@ -524,7 +524,7 @@
     },
     {
       "pattern": "^CO$",
-      "category": "Compensatory Leave",
+      "category": "Compensatory OFF",
       "status": "Inactive"
     },
     {
