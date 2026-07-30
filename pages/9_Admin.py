@@ -126,8 +126,6 @@ st.markdown("### :material/category: Categorize Unmapped Duties")
 
 # Gather existing categories from config.json and categorized_duties.csv
 existing_categories = set()
-for dept_roles in config.get("departments", {}).values():
-    existing_categories.update(dept_roles.values())
 for mapping in config.get("duty_mapping", []):
     existing_categories.add(mapping.get("category"))
     
@@ -142,10 +140,22 @@ if os.path.exists(CSV_PATH):
 
 existing_categories = sorted([c for c in existing_categories if c and c.lower() != 'nan'])
 
-# Query processed_roster for Uncategorized
-res_uncat = client.table("processed_roster").select("duty_code").eq("duty_category", "Uncategorized").execute()
-if res_uncat.data:
-    uncat_codes = sorted(list(set(row["duty_code"] for row in res_uncat.data if row.get("duty_code"))))
+# Query processed_roster for Uncategorized (using pagination to bypass 1000 row limit)
+all_uncat_data = []
+offset = 0
+limit = 1000
+while True:
+    res_uncat = client.table("processed_roster").select("duty_code").eq("duty_category", "Uncategorized").range(offset, offset + limit - 1).execute()
+    data = res_uncat.data
+    if not data:
+        break
+    all_uncat_data.extend(data)
+    if len(data) < limit:
+        break
+    offset += limit
+
+if all_uncat_data:
+    uncat_codes = sorted(list(set(row["duty_code"] for row in all_uncat_data if row.get("duty_code"))))
 else:
     uncat_codes = []
 
@@ -162,7 +172,7 @@ else:
             with col1:
                 sel_cat = st.selectbox(f"Select Category for {code}", ["— Skip —"] + existing_categories + ["Create New..."], key=f"sel_{code}")
             with col2:
-                new_cat = st.text_input(f"New Category Name", key=f"new_{code}", disabled=(sel_cat != "Create New..."))
+                new_cat = st.text_input(f"New Category Name (if 'Create New...')", key=f"new_{code}")
             
             if sel_cat != "— Skip —":
                 final_cat = new_cat.strip() if sel_cat == "Create New..." else sel_cat
@@ -185,15 +195,23 @@ else:
                             writer.writerow(["Uncategorized list:", "categorized"])
                         for code, cat in mappings_to_save.items():
                             writer.writerow([code, cat])
-                    st.success(f"Saved {len(mappings_to_save)} mappings to CSV.")
                     
-                    # Trigger re-sync
-                    with st.spinner("Re-syncing rosters with new mappings..."):
-                        sync_res = process_new_rosters(force_all=True)
-                        if sync_res and sync_res.get("status") == "success":
-                            st.success("Re-sync complete! Data has been updated.")
-                        else:
-                            st.error(sync_res.get("message", "Sync encountered an error."))
+                    # Instead of full sync, update the database directly for speed
+                    from src.pdf_parser import categorize_duty, _INACTIVE_KEYWORDS
+                    with st.spinner("Applying new categories to the database..."):
+                        success_count = 0
+                        for code, cat in mappings_to_save.items():
+                            # Infer status
+                            cat_lower = cat.lower()
+                            status = 'Inactive' if any(kw in cat_lower for kw in _INACTIVE_KEYWORDS) else 'Active'
+                            
+                            client.table("processed_roster").update({
+                                "duty_category": cat,
+                                "status": status
+                            }).eq("duty_code", code).execute()
+                            success_count += 1
+                            
+                    st.success(f"Successfully saved and applied {success_count} mappings! Data has been updated.")
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error saving mappings: {e}")

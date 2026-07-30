@@ -17,19 +17,24 @@ with open(CONFIG_PATH, 'r') as f:
 _CATEGORIZED_DUTIES_CSV = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'categorized_duties.csv')
 _EXACT_DUTY_MAP: dict = {}  # duty_code (uppercase) → category string
 
-if os.path.exists(_CATEGORIZED_DUTIES_CSV):
-    try:
-        _csv_df = pd.read_csv(_CATEGORIZED_DUTIES_CSV)
-        # The first column header is "Uncategorized list:" and the second is "categorized"
-        cols = _csv_df.columns.tolist()
-        for _, csv_row in _csv_df.iterrows():
-            raw_code = str(csv_row[cols[0]]).strip()
-            raw_cat = str(csv_row[cols[1]]).strip()
-            if raw_code and raw_cat and raw_code.lower() != 'nan' and raw_cat.lower() != 'nan':
-                _EXACT_DUTY_MAP[raw_code.upper()] = raw_cat
-        print(f"[pdf_parser] Loaded {len(_EXACT_DUTY_MAP)} exact duty overrides from categorized_duties.csv")
-    except Exception as e:
-        print(f"[pdf_parser] Warning: Could not load categorized_duties.csv: {e}")
+def reload_exact_duty_map():
+    global _EXACT_DUTY_MAP
+    _EXACT_DUTY_MAP.clear()
+    if os.path.exists(_CATEGORIZED_DUTIES_CSV):
+        try:
+            _csv_df = pd.read_csv(_CATEGORIZED_DUTIES_CSV)
+            # The first column header is "Uncategorized list:" and the second is "categorized"
+            cols = _csv_df.columns.tolist()
+            for _, csv_row in _csv_df.iterrows():
+                raw_code = str(csv_row[cols[0]]).strip()
+                raw_cat = str(csv_row[cols[1]]).strip()
+                if raw_code and raw_cat and raw_code.lower() != 'nan' and raw_cat.lower() != 'nan':
+                    _EXACT_DUTY_MAP[raw_code.upper()] = raw_cat
+            # print(f"[pdf_parser] Loaded {len(_EXACT_DUTY_MAP)} exact duty overrides from categorized_duties.csv")
+        except Exception as e:
+            print(f"[pdf_parser] Warning: Could not load categorized_duties.csv: {e}")
+
+reload_exact_duty_map()
 
 # ---------------------------------------------------------------------------
 # Crew-type resolver: splits composite crew_type strings like
@@ -194,6 +199,8 @@ def parse_ivu_pdf(pdf_path, fallback_date=None, file_name=None):
     Col 3: Mon. xx.xx (Duty + Time) -> e.g. "SM-10\n06:29-14:29"
     Col 4: Paid time
     """
+    reload_exact_duty_map()
+    
     roster_date = fallback_date
     crew_type_global = "Train Operators"
     
