@@ -221,6 +221,21 @@ else:
         st.markdown("### Employee Wise Shift Duty Matrix")
         st.markdown("Displays cumulative shift/duty breakdown per employee within the selected time range.")
         
+        with st.expander("ℹ️ Legend: Shift Timings & Duty Codes"):
+            st.markdown("""
+            **Shift Timings (Sign-ON Time):**
+            * **Early / M (Morning):** 03:00 - 07:59
+            * **General / G:** 08:00 - 13:59
+            * **Late / E (Evening):** 14:00 - 19:59
+            * **Night / N:** 20:00 - 02:59
+            
+            **Leave & Status Codes:**
+            * **CL:** Casual Leave | **SL:** Sick Leave | **EL:** Earned Leave
+            * **OH:** Optional Holiday | **PH:** Public Holiday | **CO:** Compensatory Off
+            * **LWP/LOP:** Leave Without Pay / Loss of Pay
+            * **AB:** Absent | **WO:** Weekly Off
+            """)
+        
         with st.spinner("Calculating employee-wise matrix..."):
             client = get_supabase_client()
             raw_data = fetch_all_by_date(client, 'raw_roster_data', str(start_date), str(end_date), 'emp_id, date, name, crew_type, shift_start, duty_code_raw')
