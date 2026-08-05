@@ -14,17 +14,18 @@ upload_roster     = st.Page("pages/8_Upload_Roster.py",                title="Up
 admin_page        = st.Page("pages/9_Admin.py",                        title="Admin",              icon="⚙️")
 fatigue_page      = st.Page("pages/6_Fatigue_fairness_management.py",  title="Fatigue Management", icon="⚖️")
 raw_data_page     = st.Page("pages/5_Raw_Data_Explorer.py",            title="Raw Data Explorer",  icon="🗄️")
+report_page       = st.Page("pages/7_Report.py",                       title="Report Generator",   icon="📝", url_path="Report")
 
 # ── All pages must be in the nav so their URLs work.
 #    st.navigation() returns the currently selected page BEFORE running it,
 #    so we can use it to decide which CSS to apply. ───────────────────────────
 nav = st.navigation({
     "Analytics":   [daily_overview, historical_trends],
-    "Admin Tools": [admin_page, fatigue_page, raw_data_page, upload_roster],
+    "Admin Tools": [admin_page, fatigue_page, raw_data_page, upload_roster, report_page],
 })
 
 # Detect if the currently selected page is one of the admin section pages
-ADMIN_SECTION_TITLES = {"Admin", "Fatigue Management", "Raw Data Explorer"}
+ADMIN_SECTION_TITLES = {"Admin", "Fatigue Management", "Raw Data Explorer", "Report Generator"}
 is_admin = nav.title in ADMIN_SECTION_TITLES
 
 # ── CSS: hide/show based on which section is active ──────────────────────────
@@ -33,6 +34,7 @@ if is_admin:
     hide_css = """
     [data-testid="stSidebarNav"] li:has(a[href*="Admin"]) { display: none !important; }
     [data-testid="stSidebarNav"] li:has(a[href*="Upload_Roster"]) { display: none !important; }
+    [data-testid="stSidebarNav"] li:has(a[href*="Report"]) { display: none !important; }
     """
 else:
     # Hide the ENTIRE "Admin Tools" section container (header + all links)
@@ -41,6 +43,7 @@ else:
     [data-testid="stSidebarNavItems"] > div:has(li a[href*="Fatigue_fairness_management"]) { display: none !important; }
     [data-testid="stSidebarNavItems"] > div:has(li a[href*="Raw_Data_Explorer"]) { display: none !important; }
     [data-testid="stSidebarNavItems"] > div:has(li a[href*="Upload_Roster"]) { display: none !important; }
+    [data-testid="stSidebarNavItems"] > div:has(li a[href*="Report"]) { display: none !important; }
     """
 
 st.markdown(f"<style>{hide_css}</style>", unsafe_allow_html=True)
